@@ -1,0 +1,31 @@
+[
+    {
+      "id": 1,
+      "name": "Electric Geyser 12.5 Litre",
+      "price": 22000,
+      "category": "geysers",
+      "image": "/images/geyser.jpg"
+    },
+    {
+      "id": 2,
+      "name": "Orient Mega Bracket Fan",
+      "price": 12500,
+      "category": "fans",
+      "image": "/images/fan.jpg"
+    },
+    {
+      "id": 3,
+      "name": "Iron Model X",
+      "price": 5000,
+      "category": "irons",
+      "image": "/images/iron.jpg"
+    },
+    {
+      "id": 4,
+      "name": "Room Cooler OR 800",
+      "price": 29000,
+      "category": "room-coolers",
+      "image": "/images/room-cooler.jpg"
+    }
+  ]
+  

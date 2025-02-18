@@ -1,28 +1,50 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import HeroCarousel from "../components/HeroCarousel";
+import TopSellingProducts from "../components/TopSellingProducts"; // ✅ Import Top Selling Products
+
+const categories = [
+  { name: "Geysers", image: "/images/geyser1.jpg", link: "/shop?category=geysers" },
+  { name: "Irons", image: "/images/iron1.jpeg", link: "/shop?category=irons" },
+  { name: "Fans", image: "/images/fan1.jpg", link: "/shop?category=fans" },
+  { name: "Hob", image: "/images/hob1.jpg", link: "/shop?category=hob" },
+  { name: "Range Hoods", image: "/images/rangehood1.jpeg", link: "/shop?category=range-hoods" },
+];
 
 const Home = () => {
   return (
     <div>
       {/* Hero Section */}
-      <div className="bg-gray-200 py-20 text-center">
-        <h1 className="text-4xl font-bold">ORIENT ELECTRIC WITH GAS GEYSER</h1>
-        <p className="mt-4">Instant hot water, energy-efficient solutions for your home.</p>
-        <Link to="/shop">
-          <button className="mt-6 bg-red-500 text-white px-6 py-3 rounded-lg">Shop Now</button>
-        </Link>
-      </div>
+      <HeroCarousel />
+
+      {/* Top Selling Products Section */}
+      <TopSellingProducts />
 
       {/* Categories Section */}
       <div className="container mx-auto py-10 px-6">
-        <h2 className="text-2xl font-bold mb-6">Our Top Product Categories</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <Link to="/shop?category=geysers" className="bg-gray-100 p-6 text-center">Geysers</Link>
-          <Link to="/shop?category=irons" className="bg-gray-100 p-6 text-center">Irons</Link>
-          <Link to="/shop?category=room-coolers" className="bg-gray-100 p-6 text-center">Room Coolers</Link>
-          <Link to="/shop?category=fan" className="bg-gray-100 p-6 text-center">Fans</Link>
-          <Link to="/shop?category=hob" className="bg-gray-100 p-6 text-center">Hob</Link>
-          <Link to="/shop?category=range-hoods" className="bg-gray-100 p-6 text-center">Range Hoods</Link>
+        <h2 className="text-2xl font-bold mb-6 text-center">Our Top Product Categories</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {categories.map((category, index) => (
+            <Link
+              to={category.link}
+              key={index}
+              className="border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition"
+            >
+              <img src={category.image} alt={category.name} className="w-full h-auto object-contain" />
+              <h3 className="text-center text-xl font-semibold py-4 bg-white">{category.name}</h3>
+            </Link>
+          ))}
+        </div>
+
+        {/* View All Products Button */}
+        <div className="text-center mt-8">
+          <Link
+            to="/shop"
+            className="inline-block px-6 py-3 text-black bg-gray-200 rounded-full transition duration-300 hover:bg-black hover:text-white"
+          >
+            VIEW ALL PRODUCTS
+          </Link>
         </div>
       </div>
     </div>
