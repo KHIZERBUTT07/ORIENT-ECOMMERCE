@@ -11,14 +11,14 @@ const categories = [
   { name: "Range Hoods", image: "/images/rangehood1.jpeg", link: "/shop?category=range-hoods" },
 ];
 
-const Home = () => {
+const Home = ({ addToCart }) => {
   return (
     <div>
       {/* Hero Section */}
       <HeroCarousel />
 
       {/* Top Selling Products Section */}
-      <TopSellingProducts />
+      <TopSellingProducts  addToCart={addToCart}/>
 
       {/* Categories Section */}
       <div className="container mx-auto py-10 px-6">
