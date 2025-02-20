@@ -13,7 +13,7 @@ const Shop = ({ addToCart }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortOrder, setSortOrder] = useState(""); // Sorting: "lowToHigh" or "highToLow"
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 12; // Adjust number of products per page
+  const productsPerPage = 12; // ✅ Show only 12 products per page
 
   // ✅ Fetch Products from Firebase
   useEffect(() => {
@@ -35,58 +35,51 @@ const Shop = ({ addToCart }) => {
     fetchProducts();
   }, []);
 
-  // ✅ Filter Products by Search, Category, and Sorting
+  // ✅ Filter & Sort Products
   useEffect(() => {
-    let updatedProducts = products;
+    let updatedProducts = [...products];
 
-    // 🔍 Search Filtering
+    // 🔍 Search Filtering (within selected category)
     if (searchQuery) {
       updatedProducts = updatedProducts.filter((product) =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // 📂 Category Filtering
+    // 📂 Category Filtering (works with search)
     if (selectedCategory !== "all") {
       updatedProducts = updatedProducts.filter(
         (product) => product.category === selectedCategory
       );
     }
 
-    // 🔼🔽 Sorting
+    // 🔼🔽 Sorting (correctly applied to products)
     if (sortOrder === "lowToHigh") {
-      updatedProducts = updatedProducts.sort((a, b) => a.price - b.price);
+      updatedProducts.sort((a, b) => a.price - b.price);
     } else if (sortOrder === "highToLow") {
-      updatedProducts = updatedProducts.sort((a, b) => b.price - a.price);
+      updatedProducts.sort((a, b) => b.price - a.price);
     }
 
     setFilteredProducts(updatedProducts);
-    setCurrentPage(1); // Reset pagination when filters change
+    setCurrentPage(1); // ✅ Reset pagination when filters change
   }, [searchQuery, selectedCategory, sortOrder, products]);
 
   // ✅ Get Unique Categories
-  const categories = [
-    "all",
-    ...new Set(products.map((product) => product.category)),
-  ];
+  const categories = ["all", ...new Set(products.map((product) => product.category))];
 
   // ✅ Pagination Logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
-
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   // ✅ Handle Pagination Click
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
 
   if (loading) {
-    return (
-      <h2 className="text-center text-gray-600 py-10">⏳ Loading Products...</h2>
-    );
+    return <h2 className="text-center text-gray-600 py-10">⏳ Loading Products...</h2>;
   }
 
   return (
@@ -96,7 +89,7 @@ const Shop = ({ addToCart }) => {
         <img
           src="/images/fan.png" // Update to actual banner path
           alt="Shop Banner"
-          className="w-full h-full opacity-50"
+          className="w-full h-full  opacity-50"
         />
         <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-white">
           <h1 className="text-4xl font-bold">Shop</h1>
@@ -126,7 +119,7 @@ const Shop = ({ addToCart }) => {
         </div>
 
         {/* ✅ Main Content */}
-        <div className="w-full md:w-3/4 ml-2">
+        <div className="w-full md:w-3/4 ml-2 mb-2">
           {/* ✅ Search & Sorting */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-6">
             {/* 🔍 Search Input */}
@@ -147,7 +140,9 @@ const Shop = ({ addToCart }) => {
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
             >
-              <option value="">Sort By</option>
+              <option value="" disabled hidden>
+                Sort By
+              </option>
               <option value="lowToHigh">Price: Low to High</option>
               <option value="highToLow">Price: High to Low</option>
             </select>
@@ -157,10 +152,7 @@ const Shop = ({ addToCart }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {currentProducts.length > 0 ? (
               currentProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative flex flex-col p-4"
-                >
+                <div key={product.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative flex flex-col p-4">
                   {product.discount && (
                     <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-md font-semibold">
                       {product.discount} OFF
@@ -168,38 +160,30 @@ const Shop = ({ addToCart }) => {
                   )}
 
                   <Link to={`/product/${product.id}`} className="flex-grow">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-[200px] object-contain"
-                    />
+                    <img src={product.image} alt={product.name} className="w-full h-[200px] object-contain" />
                   </Link>
 
                   <div className="pt-4 pb-6 text-center flex flex-col justify-between flex-grow">
-                    <h3 className="font-medium text-lg min-h-[3rem]">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-500 line-through text-sm">
-                      PKR {product.oldPrice}
-                    </p>
-                    <p className="text-red-600 text-xl font-bold">
-                      PKR {product.price}
-                    </p>
+                    <h3 className="font-medium text-lg min-h-[3rem]">{product.name}</h3>
+                    <p className="text-gray-500 line-through text-sm">PKR {product.oldPrice}</p>
+                    <p className="text-red-600 text-xl font-bold">PKR {product.price}</p>
 
-                    <button
-                      onClick={() => addToCart(product)}
-                      className="mt-4 bg-red-600 text-white p-3 rounded-full hover:bg-red-700 transition w-12 h-12 flex items-center justify-center mx-auto"
-                    >
+                    <button onClick={() => addToCart(product)} className="mt-4 bg-red-600 text-white p-3 rounded-full hover:bg-red-700 transition w-12 h-12 flex items-center justify-center mx-auto">
                       <FaShoppingCart className="text-xl" />
                     </button>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-center text-gray-500 w-full">
-                No products found.
-              </p>
+              <p className="text-center text-gray-500 w-full">No products found.</p>
             )}
+          </div>
+
+          {/* ✅ Pagination Buttons */}
+          <div className="flex justify-center mt-6 space-x-4">
+            <button onClick={prevPage} disabled={currentPage === 1} className="p-2 bg-gray-300 rounded">Previous</button>
+            <span>Page {currentPage} of {totalPages}</span>
+            <button onClick={nextPage} disabled={currentPage === totalPages} className="p-2 bg-gray-300 rounded">Next</button>
           </div>
         </div>
       </div>
