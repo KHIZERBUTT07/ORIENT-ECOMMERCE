@@ -186,7 +186,8 @@
   "price": 21250,
   "oldPrice":23000,
   "category": "Stoves",
-  "image": "/images/prod21.jpg"
+  "image": "/images/prod21.jpg",
+  "discount": "7%"
 },
 {
   "id": 22,
@@ -194,7 +195,8 @@
   "price": 33200,
   "oldPrice":35000,
   "category": "Stoves",
-  "image": "/images/prod22.jpg"
+  "image": "/images/prod22.jpg",
+  "discount": "7%"
 },
 {
   "id": 23,
@@ -202,7 +204,8 @@
   "price": 31300,
   "oldPrice":34000,
   "category": "Stoves",
-  "image": "/images/prod23.jpg"
+  "image": "/images/prod23.jpg",
+  "discount": "7%"
 },
 {
   "id": 24,
@@ -210,7 +213,8 @@
   "price": 39900,
   "oldPrice":41000,
   "category": "Stoves",
-  "image": "/images/prod24.jpg"
+  "image": "/images/prod24.jpg",
+  "discount": "7%"
 },
 {
   "id": 25,
@@ -218,7 +222,8 @@
   "price": 8840,
   "oldPrice":11000,
   "category": "fans",
-  "image": "/images/prod25.jpeg"
+  "image": "/images/prod25.jpeg",
+  "discount": "7%"
 },
 {
   "id": 39,
@@ -226,7 +231,8 @@
   "price": 40500,
   "oldPrice":43000,
   "category": "Stoves",
-  "image": "/images/prod26.jpg"
+  "image": "/images/prod26.jpg",
+  "discount": "7%"
 },
 {
   "id": 40,
@@ -234,7 +240,8 @@
   "price": 9300,
   "oldPrice":12000,
   "category": "fans",
-  "image": "/images/prod27.jpeg"
+  "image": "/images/prod27.jpeg",
+  "discount": "7%"
 },
 {
   "id": 26,
@@ -242,7 +249,8 @@
   "price": 28000,
   "oldPrice":31000,
   "category": "geysers",
-  "image": "/images/prod28.jpeg"
+  "image": "/images/prod28.jpeg",
+  "discount": "7%"
 },
 {
   "id": 27,
@@ -250,7 +258,8 @@
   "price": 26500,
   "oldPrice":35000,
   "category": "geysers",
-  "image": "/images/prod28.jpeg"
+  "image": "/images/prod28.jpeg",
+  "discount": "7%"
 },
 {
   "id": 28,
@@ -258,7 +267,8 @@
   "price": 30000,
   "oldPrice":33000,
   "category": "geysers",
-  "image": "/images/prod28.jpeg"
+  "image": "/images/prod28.jpeg",
+  "discount": "7%"
 },
 {
   "id": 29,
@@ -266,7 +276,8 @@
   "price": 50000,
   "oldPrice":53000,
   "category": "geysers",
-  "image": "/images/prod29.jpeg"
+  "image": "/images/prod29.jpeg",
+  "discount": "7%"
 },
 {
   "id": 30,
@@ -274,7 +285,8 @@
   "price": 12000,
   "oldPrice":14000,
   "category": "Stoves",
-  "image": "/images/prod30.jpeg"
+  "image": "/images/prod30.jpeg",
+  "discount": "7%"
 },
 {
   "id": 31,
@@ -282,7 +294,8 @@
   "price": 10000,
   "oldPrice":12500,
   "category": "Stoves",
-  "image": "/images/prod31.jpeg"
+  "image": "/images/prod31.jpeg",
+  "discount": "7%"
 },
 {
   "id": 32,
@@ -290,7 +303,8 @@
   "price": 32000,
   "oldPrice":35000,
   "category": "room-coolers",
-  "image": "/images/prod32.jpg"
+  "image": "/images/prod32.jpg",
+  "discount": "7%"
 },
 {
   "id": 33,
@@ -298,7 +312,8 @@
   "price": 9030,
   "oldPrice":11000,
   "category": "fans",
-  "image": "/images/prod34.jpg"
+  "image": "/images/prod34.jpg",
+  "discount": "7%"
 },
 {
   "id": 34,
@@ -306,7 +321,8 @@
   "price": 8200,
   "oldPrice":10500,
   "category": "fans",
-  "image": "/images/prod35.jpeg"
+  "image": "/images/prod35.jpeg",
+  "discount": "7%"
 },
 {
   "id": 35,
@@ -314,7 +330,8 @@
   "price": 7975,
   "oldPrice":9999,
   "category": "fans",
-  "image": "/images/prod36.jpg"
+  "image": "/images/prod36.jpg",
+  "discount": "7%"
 },
 {
   "id": 36,
@@ -322,7 +339,8 @@
   "price": 8237,
   "oldPrice":10000,
   "category": "fans",
-  "image": "/images/prod37.jpeg"
+  "image": "/images/prod37.jpeg",
+  "discount": "7%"
 },
 {
   "id": 37,
@@ -330,7 +348,8 @@
   "price": 10200,
   "oldPrice":12000,
   "category": "fans",
-  "image": "/images/prod38.jpeg"
+  "image": "/images/prod38.jpeg",
+  "discount": "7%"
 },  
 {
   "id": 38,
@@ -338,6 +357,7 @@
   "price": 8000,
   "oldPrice":10200,
   "category": "fans",
-  "image": "/images/prod39.jpg"
+  "image": "/images/prod39.jpg",
+  "discount": "7%"
 }
 ]

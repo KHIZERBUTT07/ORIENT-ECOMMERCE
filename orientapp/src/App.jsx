@@ -1,20 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import SidebarCart from "./components/SidebarCart";
+import Footer from "./components/Footer"; // ✅ Import Footer
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import CartPage from "./pages/CartPage";
+import ProductDetail from "./pages/ProductDetail"; // ✅ Import Product Detail Page
+import AdminDashboard from "./admin/AdminDashboard";
+import productsData from "./data/products"; // ✅ Import mock products
 
 const App = () => {
   const [cart, setCart] = useState([]);
   const [cartCount, setCartCount] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // ✅ Store search query
+  const [products, setProducts] = useState([]);
 
+  // ✅ Load Products (Mock + Admin Added) from Local Storage
+  useEffect(() => {
+    const storedProducts = JSON.parse(localStorage.getItem("products")) || productsData;
+    setProducts(storedProducts);
+  }, []);
+
+  // ✅ Load Cart from Local Storage
+  useEffect(() => {
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(storedCart);
+    setCartCount(storedCart.reduce((total, item) => total + item.quantity, 0));
+  }, []);
+
+  // ✅ Function to add item to cart
   const addToCart = (product) => {
     alert(`${product.name} has been added to your cart!`);
 
-    // Check if the product is already in the cart
     const existingProduct = cart.find((item) => item.id === product.id);
 
     let updatedCart;
@@ -27,22 +46,85 @@ const App = () => {
     }
 
     setCart(updatedCart);
-    setCartCount(updatedCart.length);
-    setIsCartOpen(true); // ✅ Open Sidebar Cart after adding
+    setCartCount(updatedCart.reduce((total, item) => total + item.quantity, 0));
+    setIsCartOpen(true);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
 
+  // ✅ Function to remove item from cart
+  const removeFromCart = (productId) => {
+    const updatedCart = cart.filter((item) => item.id !== productId);
+    setCart(updatedCart);
+    setCartCount(updatedCart.reduce((total, item) => total + item.quantity, 0));
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
+
+  // ✅ Function to increase product quantity
+  const increaseQuantity = (productId) => {
+    const updatedCart = cart.map((item) =>
+      item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+    );
+    setCart(updatedCart);
+    setCartCount(updatedCart.reduce((total, item) => total + item.quantity, 0));
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
+
+  // ✅ Function to decrease product quantity
+  const decreaseQuantity = (productId) => {
+    const updatedCart = cart.map((item) =>
+      item.id === productId && item.quantity > 1
+        ? { ...item, quantity: item.quantity - 1 }
+        : item
+    );
+    setCart(updatedCart);
+    setCartCount(updatedCart.reduce((total, item) => total + item.quantity, 0));
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
   return (
     <>
-      <Navbar cartCount={cartCount} setIsCartOpen={setIsCartOpen} />
-      <SidebarCart isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} cart={cart} setCart={setCart} />
+      {/* ✅ Navbar with Search & Cart */}
+      <Navbar 
+        cartCount={cartCount} 
+        setIsCartOpen={setIsCartOpen} 
+        setSearchQuery={setSearchQuery} // ✅ Pass search query state
+      />
 
+      {/* ✅ Sidebar Cart */}
+      <SidebarCart
+        isCartOpen={isCartOpen}
+        setIsCartOpen={setIsCartOpen}
+        cart={cart}
+        removeFromCart={removeFromCart}
+        increaseQuantity={increaseQuantity}
+        decreaseQuantity={decreaseQuantity}
+      />
+
+      {/* ✅ Routes */}
       <Routes>
-        <Route path="/" element={<Home addToCart={addToCart} />} />
+        <Route path="/" element={<Home addToCart={addToCart} searchQuery={searchQuery} />} />
         <Route path="/shop" element={<Shop addToCart={addToCart} />} />
-        <Route path="/cart" element={<CartPage cart={cart} setCart={setCart} />} />
+        <Route 
+          path="/cart" 
+          element={
+            <CartPage 
+              cart={cart}
+              removeFromCart={removeFromCart}
+              increaseQuantity={increaseQuantity}
+              decreaseQuantity={decreaseQuantity}
+            />
+          } 
+        />
+
+        {/* ✅ Product Detail Page */}
+        <Route path="/product/:productId" element={<ProductDetail addToCart={addToCart} />} />
+
+        {/* ✅ Admin Dashboard */}
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
+
+      {/* ✅ Footer */}
+      <Footer />
     </>
   );
 };
