@@ -1,6 +1,6 @@
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaShoppingCart, FaSearch, FaBars, FaTimes } from "react-icons/fa";
+import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import logo from "/images/logo.png";
 import products from "../data/products"; // ✅ Import product data
 
@@ -11,17 +11,23 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // ✅ Pages where search should be hidden
-  const hiddenSearchPages = ["/admin", "/about", "/contact" ,"/shop"];
-  const isHiddenSearch = hiddenSearchPages.some((path) => location.pathname.startsWith(path));
+  // ✅ Check if Admin is Logged In
+  const isAdminPage = location.pathname.startsWith("/admin");
+  const isAdminAuthenticated = localStorage.getItem("adminAuth") === "true";
+
+  // ✅ Handle Logout
+  const handleLogout = () => {
+    localStorage.removeItem("adminAuth");
+    navigate("/admin/login");
+  };
 
   // ✅ Handle search submission
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
       setSearchQuery(searchTerm);
-      navigate("/shop");
-      setMenuOpen(false); // Close menu on search
+      navigate("/");
+      setMenuOpen(false);
     }
   };
 
@@ -29,6 +35,10 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
   const handleChange = (e) => {
     const query = e.target.value;
     setSearchTerm(query);
+
+    if (query.trim() === "") {
+      setSearchQuery(""); // ✅ Reset search when cleared
+    }
 
     if (query.length > 1) {
       const filteredProducts = products.filter((product) =>
@@ -40,6 +50,14 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
     }
   };
 
+  // ✅ Hide search input on Admin, About, Contact, and Shop pages (but keep space on large screens)
+  const hideSearchInput =
+    isAdminPage ||
+    location.pathname === "/about" ||
+    location.pathname === "/contact" ||
+    location.pathname === "/shop";
+
+  // ✅ Active Link Styling
   const isActive = (path) =>
     location.pathname === path ? "text-red-500 font-bold" : "text-black hover:text-red-500";
 
@@ -47,21 +65,21 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
     <nav className="bg-white shadow-md py-4 relative z-50">
       <div className="container mx-auto flex justify-between items-center px-6">
         {/* ✅ Logo */}
-        <Link to="/" onClick={() => setMenuOpen(false)}>
+        <Link to="/">
           <img src={logo} alt="Orient Appliances" className="h-10" />
         </Link>
 
         {/* ✅ Desktop Menu */}
         <div className="hidden md:flex space-x-6">
-          <Link to="/" className={isActive("/")} onClick={() => setMenuOpen(false)}>Home</Link>
-          <Link to="/shop" className={isActive("/shop")} onClick={() => setMenuOpen(false)}>Products</Link>
-          <Link to="/about" className={isActive("/about")} onClick={() => setMenuOpen(false)}>Who We Are</Link>
-          <Link to="/contact" className={isActive("/contact")} onClick={() => setMenuOpen(false)}>Contact</Link>
+          <Link to="/" className={isActive("/")}>Home</Link>
+          <Link to="/shop" className={isActive("/shop")}>Products</Link>
+          <Link to="/about" className={isActive("/about")}>Who We Are</Link>
+          <Link to="/contact" className={isActive("/contact")}>Contact</Link>
         </div>
 
-        {/* ✅ Search Input - Hidden on Certain Pages */}
-        {!isHiddenSearch && (
-          <div className="hidden md:flex relative">
+        {/* ✅ Search Input - Hidden on Admin, About, Contact, and Shop Pages but still occupies space */}
+        <div className={`hidden md:flex relative ${hideSearchInput ? "invisible w-48" : "w-auto"}`}>
+          {!hideSearchInput && (
             <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
@@ -85,7 +103,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
                         setSearchTerm(product.name);
                         setSuggestions([]);
                         setSearchQuery(product.name);
-                        navigate("/shop");
+                        navigate("/");
                       }}
                     >
                       {product.name}
@@ -94,19 +112,29 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
                 </ul>
               )}
             </form>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* ✅ Cart & Hamburger Button */}
+        {/* ✅ Cart, Logout & Hamburger Button */}
         <div className="flex space-x-4 items-center">
-          <button onClick={() => setIsCartOpen((prev) => !prev)} className="relative text-red-600 hover:text-red-800">
-            <FaShoppingCart className="text-2xl" />
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                {cartCount}
-              </span>
-            )}
-          </button>
+          {/* ✅ Show Cart Button only if NOT on Admin Pages */}
+          {!isAdminPage && (
+            <button onClick={() => setIsCartOpen((prev) => !prev)} className="relative text-red-600 hover:text-red-800">
+              <FaShoppingCart className="text-2xl" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {/* ✅ Show Logout Button ONLY on Admin Pages */}
+          {isAdminAuthenticated && isAdminPage && (
+            <button onClick={handleLogout} className="text-red-600 hover:text-red-800">
+              <FaSignOutAlt className="text-2xl" title="Logout" />
+            </button>
+          )}
 
           {/* ✅ Hamburger Menu for Mobile */}
           <button className="md:hidden text-2xl text-red-600" onClick={() => setMenuOpen(!menuOpen)}>
@@ -123,8 +151,8 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
           <Link to="/about" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Who We Are</Link>
           <Link to="/contact" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Contact</Link>
 
-          {/* ✅ Search Bar (Centered on Mobile & Hidden on Admin, About, Contact) */}
-          {!isHiddenSearch && (
+          {/* ✅ Search Bar in Mobile Menu */}
+          {!hideSearchInput && (
             <form onSubmit={handleSearch} className="relative w-3/4 mt-4">
               <input
                 type="text"
@@ -137,6 +165,13 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
                 <FaSearch />
               </button>
             </form>
+          )}
+          
+          {/* ✅ Logout Button in Mobile Menu if Admin is Logged In */}
+          {isAdminAuthenticated && isAdminPage && (
+            <button onClick={handleLogout} className="mt-4 text-lg text-red-600 hover:text-red-800">
+              Logout
+            </button>
           )}
         </div>
       )}

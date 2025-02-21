@@ -150,6 +150,7 @@ const AdminDashboard = () => {
       console.error("Error deleting product:", error);
     }
   };
+  
 
   return (
     <div className="container mx-auto py-10 px-6">

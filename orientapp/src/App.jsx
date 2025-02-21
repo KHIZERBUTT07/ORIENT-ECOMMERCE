@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import SidebarCart from "./components/SidebarCart";
 import Footer from "./components/Footer"; // ✅ Import Footer
@@ -14,6 +14,7 @@ import About from "./pages/About"; // ✅ Import About Page
 import productsData from "./data/products"; // ✅ Import mock products
 import { ToastContainer } from "react-toastify";
 import Contact from "./pages/Contact";
+import AdminLogin from "./admin/AdminLogin";
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -86,6 +87,13 @@ const App = () => {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
+  // ✅ Protected Route Component (For Admin Pages)
+const ProtectedRoute = ({ element }) => {
+  const isAdminAuthenticated = localStorage.getItem("adminAuth") === "true";
+  return isAdminAuthenticated ? element : <Navigate to="/admin/login" />;
+};
+
+
   return (
     <>
       <ToastContainer position="top-right" autoClose={2000} />
@@ -135,11 +143,12 @@ const App = () => {
         {/* ✅ Contact Page */} 
         <Route path="/contact" element={<Contact />} />
 
-        {/* ✅ Admin Dashboard */}
-        <Route path="/admin" element={<AdminDashboard />} />
+          {/* ✅ Admin Routes (Protected) */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} />} />
+        <Route path="/admin/orders" element={<ProtectedRoute element={<AdminOrders />} />} />
 
-        {/* ✅ Admin Orders Page */}
-        <Route path="/admin/orders" element={<AdminOrders />} />
+
       </Routes>
 
       {/* ✅ Footer */}
