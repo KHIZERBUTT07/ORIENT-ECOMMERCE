@@ -39,21 +39,21 @@ const Shop = ({ addToCart }) => {
   useEffect(() => {
     let updatedProducts = [...products];
 
-    // 🔍 Search Filtering (within selected category)
+    // 🔍 Search Filtering
     if (searchQuery) {
       updatedProducts = updatedProducts.filter((product) =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // 📂 Category Filtering (works with search)
+    // 📂 Category Filtering
     if (selectedCategory !== "all") {
       updatedProducts = updatedProducts.filter(
         (product) => product.category === selectedCategory
       );
     }
 
-    // 🔼🔽 Sorting (correctly applied to products)
+    // 🔼🔽 Sorting by Price
     if (sortOrder === "lowToHigh") {
       updatedProducts.sort((a, b) => a.price - b.price);
     } else if (sortOrder === "highToLow") {
@@ -89,7 +89,7 @@ const Shop = ({ addToCart }) => {
         <img
           src="/images/fan.png" // Update to actual banner path
           alt="Shop Banner"
-          className="w-full h-full  opacity-50"
+          className="w-full h-full opacity-50"
         />
         <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-white">
           <h1 className="text-4xl font-bold">Shop</h1>
@@ -119,7 +119,7 @@ const Shop = ({ addToCart }) => {
         </div>
 
         {/* ✅ Main Content */}
-        <div className="w-full md:w-3/4 ml-2 mb-2">
+        <div className="w-full md:w-3/4 mb-2 lg:ml-2 sm:mt-1.5">
           {/* ✅ Search & Sorting */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-6">
             {/* 🔍 Search Input */}
@@ -168,7 +168,11 @@ const Shop = ({ addToCart }) => {
                     <p className="text-gray-500 line-through text-sm">PKR {product.oldPrice}</p>
                     <p className="text-red-600 text-xl font-bold">PKR {product.price}</p>
 
-                    <button onClick={() => addToCart(product)} className="mt-4 bg-red-600 text-white p-3 rounded-full hover:bg-red-700 transition w-12 h-12 flex items-center justify-center mx-auto">
+                    {/* ✅ Add to Cart Button */}
+                    <button
+                      onClick={() => addToCart(product)}
+                      className="mt-4 bg-red-600 text-white p-3 rounded-full hover:bg-red-700 transition w-12 h-12 flex items-center justify-center mx-auto"
+                    >
                       <FaShoppingCart className="text-xl" />
                     </button>
                   </div>

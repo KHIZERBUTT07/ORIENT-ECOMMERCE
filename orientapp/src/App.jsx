@@ -8,7 +8,12 @@ import Shop from "./pages/Shop";
 import CartPage from "./pages/CartPage";
 import ProductDetail from "./pages/ProductDetail"; // ✅ Import Product Detail Page
 import AdminDashboard from "./admin/AdminDashboard";
+import Checkout from "./pages/Checkout"; // ✅ Import Checkout Page
+import AdminOrders from "./admin/AdminOrders";
+import About from "./pages/About"; // ✅ Import About Page
 import productsData from "./data/products"; // ✅ Import mock products
+import { ToastContainer } from "react-toastify";
+import Contact from "./pages/Contact";
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -83,6 +88,8 @@ const App = () => {
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={2000} />
+      
       {/* ✅ Navbar with Search & Cart */}
       <Navbar 
         cartCount={cartCount} 
@@ -119,8 +126,20 @@ const App = () => {
         {/* ✅ Product Detail Page */}
         <Route path="/product/:productId" element={<ProductDetail addToCart={addToCart} />} />
 
+        {/* ✅ Checkout Page */}
+        <Route path="/checkout" element={<Checkout cartItems={cart} clearCart={() => setCart([])} />} />
+
+        {/* ✅ About Page */}
+        <Route path="/about" element={<About />} />
+
+        {/* ✅ Contact Page */} 
+        <Route path="/contact" element={<Contact />} />
+
         {/* ✅ Admin Dashboard */}
         <Route path="/admin" element={<AdminDashboard />} />
+
+        {/* ✅ Admin Orders Page */}
+        <Route path="/admin/orders" element={<AdminOrders />} />
       </Routes>
 
       {/* ✅ Footer */}

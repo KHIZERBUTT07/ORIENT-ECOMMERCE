@@ -64,9 +64,9 @@ const CartPage = ({ cart, removeFromCart, increaseQuantity, decreaseQuantity }) 
               <p>PKR {overallTotal.toLocaleString()}</p>
             </div>
 
-            <button className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition mt-4">
-              Proceed to Checkout
-            </button>
+            <Link to="/checkout" className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 flex items-center justify-center">
+  Proceed to Checkout
+</Link>
 
             <Link to="/shop" className="block text-center text-red-500 mt-4 hover:underline">
               Continue Shopping
