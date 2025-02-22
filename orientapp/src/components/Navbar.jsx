@@ -88,7 +88,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
                 onChange={handleChange}
                 className="border rounded-lg px-4 py-2 focus:ring focus:ring-red-300"
               />
-              <button type="submit" className="absolute right-2 top-2 text-red-600 hover:text-red-800">
+              <button type="submit" className=" mt-1.5 absolute right-2 top-2 text-red-600 hover:text-red-800">
                 <FaSearch />
               </button>
 

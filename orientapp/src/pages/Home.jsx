@@ -5,11 +5,11 @@ import TopSellingProducts from "../components/TopSellingProducts";
 import products from "../data/products"; // ✅ Import all products
 
 const categories = [
-  { name: "Geysers", image: "/images/geyser1.jpg", link: "/shop?category=geysers" },
-  { name: "Irons", image: "/images/iron1.jpeg", link: "/shop?category=irons" },
-  { name: "Fans", image: "/images/fan1.jpg", link: "/shop?category=fans" },
-  { name: "Hob", image: "/images/hob1.jpg", link: "/shop?category=hob" },
-  { name: "Range Hoods", image: "/images/rangehood1.jpeg", link: "/shop?category=range-hoods" },
+  { name: "Geysers", image: "/images/geyser1.jpg", link: "/shop/geysers" },
+  { name: "Irons", image: "/images/iron1.jpeg", link: "/shop/irons" },
+  { name: "Fans", image: "/images/fan1.jpg", link: "/shop/fans" },
+  { name: "Hob", image: "/images/hob1.jpg", link: "/shop/hob" },
+  { name: "Range Hoods", image: "/images/rangehood1.jpeg", link: "/shop/range-hoods" },
 ];
 
 const Home = ({ addToCart, searchQuery }) => {
@@ -92,7 +92,7 @@ const Home = ({ addToCart, searchQuery }) => {
           <div className="container mx-auto py-10 px-6">
             <h2 className="text-2xl font-bold mb-6 text-center">Our Top Product Categories</h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
               {categories.map((category, index) => (
                 <Link
                   to={category.link}

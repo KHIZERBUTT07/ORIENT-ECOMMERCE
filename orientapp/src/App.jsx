@@ -11,10 +11,14 @@ import AdminDashboard from "./admin/AdminDashboard";
 import Checkout from "./pages/Checkout"; // ✅ Import Checkout Page
 import AdminOrders from "./admin/AdminOrders";
 import About from "./pages/About"; // ✅ Import About Page
+import Contact from "./pages/Contact"; // ✅ Import Contact Page
+import AdminLogin from "./admin/AdminLogin";
 import productsData from "./data/products"; // ✅ Import mock products
 import { ToastContainer } from "react-toastify";
-import Contact from "./pages/Contact";
-import AdminLogin from "./admin/AdminLogin";
+
+// Categories Pages Components (Each category component filters products based on category)
+
+import ShopCategoryPage from "./pages/ShopCategoryPage";
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -88,11 +92,10 @@ const App = () => {
   };
 
   // ✅ Protected Route Component (For Admin Pages)
-const ProtectedRoute = ({ element }) => {
-  const isAdminAuthenticated = localStorage.getItem("adminAuth") === "true";
-  return isAdminAuthenticated ? element : <Navigate to="/admin/login" />;
-};
-
+  const ProtectedRoute = ({ element }) => {
+    const isAdminAuthenticated = localStorage.getItem("adminAuth") === "true";
+    return isAdminAuthenticated ? element : <Navigate to="/admin/login" />;
+  };
 
   return (
     <>
@@ -143,11 +146,13 @@ const ProtectedRoute = ({ element }) => {
         {/* ✅ Contact Page */} 
         <Route path="/contact" element={<Contact />} />
 
-          {/* ✅ Admin Routes (Protected) */}
-          <Route path="/admin/login" element={<AdminLogin />} />
+        {/* ✅ Admin Routes (Protected) */}
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} />} />
         <Route path="/admin/orders" element={<ProtectedRoute element={<AdminOrders />} />} />
 
+        {/* ✅ Category Routes */}
+        <Route path="/shop/category/:category" element={<ShopCategoryPage products={products} addToCart={addToCart} />} />
 
       </Routes>
 
