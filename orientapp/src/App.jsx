@@ -14,11 +14,12 @@ import About from "./pages/About"; // ✅ Import About Page
 import Contact from "./pages/Contact"; // ✅ Import Contact Page
 import AdminLogin from "./admin/AdminLogin";
 import productsData from "./data/products"; // ✅ Import mock products
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 
 // Categories Pages Components (Each category component filters products based on category)
-
 import ShopCategoryPage from "./pages/ShopCategoryPage";
+import AdminMembership from "./admin/AdminMembership";
+import Membership from "./pages/Membership";
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -42,10 +43,8 @@ const App = () => {
 
   // ✅ Function to add item to cart
   const addToCart = (product) => {
-    alert(`${product.name} has been added to your cart!`);
-
     const existingProduct = cart.find((item) => item.id === product.id);
-
+  
     let updatedCart;
     if (existingProduct) {
       updatedCart = cart.map((item) =>
@@ -54,12 +53,20 @@ const App = () => {
     } else {
       updatedCart = [...cart, { ...product, quantity: 1 }];
     }
-
+  
     setCart(updatedCart);
     setCartCount(updatedCart.reduce((total, item) => total + item.quantity, 0));
     setIsCartOpen(true);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+  
+    // ✅ Ensure toast notification only appears once
+    if (!existingProduct) {
+      toast.success(`${product.name} has been added to your cart!`);
+    } else {
+      toast.info(`${product.name} quantity increased!`);
+    }
   };
+    
 
   // ✅ Function to remove item from cart
   const removeFromCart = (productId) => {
@@ -99,12 +106,13 @@ const App = () => {
 
   return (
     <>
+      {/* ✅ ToastContainer for toast notifications */}
       <ToastContainer position="top-right" autoClose={2000} />
-      
+
       {/* ✅ Navbar with Search & Cart */}
-      <Navbar 
-        cartCount={cartCount} 
-        setIsCartOpen={setIsCartOpen} 
+      <Navbar
+        cartCount={cartCount}
+        setIsCartOpen={setIsCartOpen}
         setSearchQuery={setSearchQuery} // ✅ Pass search query state
       />
 
@@ -122,16 +130,16 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home addToCart={addToCart} searchQuery={searchQuery} />} />
         <Route path="/shop" element={<Shop addToCart={addToCart} />} />
-        <Route 
-          path="/cart" 
+        <Route
+          path="/cart"
           element={
-            <CartPage 
+            <CartPage
               cart={cart}
               removeFromCart={removeFromCart}
               increaseQuantity={increaseQuantity}
               decreaseQuantity={decreaseQuantity}
             />
-          } 
+          }
         />
 
         {/* ✅ Product Detail Page */}
@@ -143,17 +151,21 @@ const App = () => {
         {/* ✅ About Page */}
         <Route path="/about" element={<About />} />
 
-        {/* ✅ Contact Page */} 
+        {/* ✅ Contact Page */}
         <Route path="/contact" element={<Contact />} />
+
+        {/* ✅ Membership Page */}
+        <Route path="/membership" element={<Membership />} />
 
         {/* ✅ Admin Routes (Protected) */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} />} />
         <Route path="/admin/orders" element={<ProtectedRoute element={<AdminOrders />} />} />
+        <Route path="/admin/memberships" element={<ProtectedRoute element={<AdminMembership />} />} />
+
 
         {/* ✅ Category Routes */}
         <Route path="/shop/category/:category" element={<ShopCategoryPage products={products} addToCart={addToCart} />} />
-
       </Routes>
 
       {/* ✅ Footer */}

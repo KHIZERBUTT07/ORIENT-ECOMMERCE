@@ -71,10 +71,20 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
 
         {/* ✅ Desktop Menu */}
         <div className="hidden md:flex space-x-6">
-          <Link to="/" className={isActive("/")}>Home</Link>
-          <Link to="/shop" className={isActive("/shop")}>Products</Link>
-          <Link to="/about" className={isActive("/about")}>Who We Are</Link>
-          <Link to="/contact" className={isActive("/contact")}>Contact</Link>
+          {isAdminAuthenticated && isAdminPage ? (
+            <>
+              <Link to="/admin" className={isActive("/admin")}>Dashboard</Link>
+              <Link to="/admin/orders" className={isActive("/admin/orders")}>Orders</Link>
+              <Link to="/admin/memberships" className={isActive("/admin/memberships")}>Memberships</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/" className={isActive("/")}>Home</Link>
+              <Link to="/shop" className={isActive("/shop")}>Products</Link>
+              <Link to="/about" className={isActive("/about")}>Who We Are</Link>
+              <Link to="/contact" className={isActive("/contact")}>Contact</Link>
+            </>
+          )}
         </div>
 
         {/* ✅ Search Input - Hidden on Admin, About, Contact, and Shop Pages but still occupies space */}
@@ -88,7 +98,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
                 onChange={handleChange}
                 className="border rounded-lg px-4 py-2 focus:ring focus:ring-red-300"
               />
-              <button type="submit" className=" mt-1.5 absolute right-2 top-2 text-red-600 hover:text-red-800">
+              <button type="submit" className="mt-1.5 absolute right-2 top-2 text-red-600 hover:text-red-800">
                 <FaSearch />
               </button>
 
@@ -146,13 +156,23 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
       {/* ✅ Mobile Menu (Dropdown) */}
       {menuOpen && (
         <div className="absolute top-16 left-0 w-full bg-white shadow-md flex flex-col items-center py-4 md:hidden">
-          <Link to="/" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Home</Link>
-          <Link to="/shop" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Products</Link>
-          <Link to="/about" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Who We Are</Link>
-          <Link to="/contact" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Contact</Link>
+          {isAdminAuthenticated && isAdminPage ? (
+            <>
+              <Link to="/admin" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+              <Link to="/admin/orders" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Orders</Link>
+              <Link to="/admin/memberships" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Memberships</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Home</Link>
+              <Link to="/shop" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Products</Link>
+              <Link to="/about" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Who We Are</Link>
+              <Link to="/contact" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Contact</Link>
+            </>
+          )}
 
-          {/* ✅ Search Bar in Mobile Menu */}
-          {!hideSearchInput && (
+          {/* ✅ Search Bar in Mobile Menu (Only on Home Page) */}
+          {location.pathname === "/" && (
             <form onSubmit={handleSearch} className="relative w-3/4 mt-4">
               <input
                 type="text"
@@ -166,7 +186,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
               </button>
             </form>
           )}
-          
+
           {/* ✅ Logout Button in Mobile Menu if Admin is Logged In */}
           {isAdminAuthenticated && isAdminPage && (
             <button onClick={handleLogout} className="mt-4 text-lg text-red-600 hover:text-red-800">

@@ -25,7 +25,7 @@ const Shop = ({ addToCart }) => {
           ...doc.data(),
         }));
         setProducts(productList);
-        setFilteredProducts(productList);
+        setFilteredProducts(productList); // Initialize filteredProducts with all products
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
@@ -90,6 +90,7 @@ const Shop = ({ addToCart }) => {
           src="/images/fan.png" // Update to actual banner path
           alt="Shop Banner"
           className="w-full h-full opacity-50"
+          loading="lazy" // Lazy load the banner image
         />
         <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-white">
           <h1 className="text-4xl font-bold">Shop</h1>
@@ -160,7 +161,12 @@ const Shop = ({ addToCart }) => {
                   )}
 
                   <Link to={`/product/${product.id}`} className="flex-grow">
-                    <img src={product.image} alt={product.name} className="w-full h-[200px] object-contain" />
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-[200px] object-contain"
+                      loading="lazy" // Lazy load product images
+                    />
                   </Link>
 
                   <div className="pt-4 pb-6 text-center flex flex-col justify-between flex-grow">

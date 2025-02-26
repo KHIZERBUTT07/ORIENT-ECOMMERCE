@@ -56,7 +56,7 @@ const AdminOrders = () => {
         <p className="text-center text-gray-500 mt-6">No orders found.</p>
       ) : (
         <div className="overflow-x-auto mt-6">
-          {/* ✅ Desktop View - Table Format (Only for screens larger than 1023px) */}
+          {/* ✅ Desktop View - Table Format */}
           <div className="hidden lg:block">
             <table className="min-w-full border-collapse border border-gray-300">
               <thead>
@@ -66,6 +66,7 @@ const AdminOrders = () => {
                   <th className="border border-gray-300 p-3">Customer</th>
                   <th className="border border-gray-300 p-3">Address</th>
                   <th className="border border-gray-300 p-3">Total (PKR)</th>
+                  <th className="border border-gray-300 p-3">Note</th> {/* ✅ Add Note Column */}
                   <th className="border border-gray-300 p-3">Status</th>
                   <th className="border border-gray-300 p-3">Actions</th>
                 </tr>
@@ -87,6 +88,7 @@ const AdminOrders = () => {
                       </td>
                       <td className="border border-gray-300 p-3">{order.user.address}, {order.user.city}</td>
                       <td className="border border-gray-300 p-3 font-bold text-red-600">{order.total}</td>
+                      <td className="border border-gray-300 p-3">{order.note || "No note"}</td> {/* ✅ Display Note */}
                       <td className="border border-gray-300 p-3">
                         <span className={`px-3 py-1 rounded-md text-white ${getStatusColor(order.status)}`}>
                           {order.status}
@@ -112,7 +114,7 @@ const AdminOrders = () => {
             </table>
           </div>
 
-          {/* ✅ Mobile View - Card Format (Visible up to 1023px width) */}
+          {/* ✅ Mobile View - Card Format */}
           <div className="block lg:hidden flex flex-col space-y-4 mt-4">
             {orders.map((order) =>
               order.items.map((item, index) => (
@@ -127,6 +129,7 @@ const AdminOrders = () => {
                   <p className="text-gray-600"><strong>Customer:</strong> {order.user.name} ({order.user.phone})</p>
                   <p className="text-gray-600"><strong>Address:</strong> {order.user.address}, {order.user.city}</p>
                   <p className="text-gray-700 font-semibold mt-2">Total: <span className="text-red-600">PKR {order.total}</span></p>
+                  <p className="text-gray-600"><strong>Note:</strong> {order.note || "No note"}</p> {/* ✅ Display Note */}
 
                   {/* ✅ Order Status Badge */}
                   <div className="flex items-center mt-2">

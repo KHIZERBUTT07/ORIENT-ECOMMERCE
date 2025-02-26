@@ -4,6 +4,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Link } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
+import { toast } from "react-toastify";  // Import toast from react-toastify
 
 // ✅ Custom Navigation Arrows (Now at the Top of Carousel)
 const CustomPrevArrow = ({ onClick }) => (
@@ -90,14 +91,15 @@ const TopSellingProducts = ({ addToCart }) => {
 
                   {/* ✅ Add to Cart Button */}
                   <button
-                    onClick={() => {
-                      alert(`${product.name} added to cart!`);
-                      addToCart(product);
-                    }}
-                    className="absolute bottom-4 right-4 bg-red-600 text-white p-3 rounded-full hover:bg-red-700 transition"
-                  >
-                    <FaShoppingCart className="text-xl" />
-                  </button>
+  onClick={(e) => {
+    e.stopPropagation(); // Prevents duplicate event bubbling
+    addToCart(product);
+  }}
+  className="absolute bottom-4 right-4 bg-red-600 text-white p-3 rounded-full hover:bg-red-700 transition"
+>
+  <FaShoppingCart className="text-xl" />
+</button>
+                 
                 </div>
               </div>
             </div>

@@ -6,7 +6,7 @@ const About = () => {
       {/* ✅ Hero Section */}
       <div className="relative w-full h-[350px] bg-black">
         <img
-          src="/images/aboutbanner.jpg" // 🔄 Update with actual banner path
+          src="/images/1732876776.jpeg" // 🔄 Update with actual banner path
           alt="About Us"
           className="w-full h-full object-cover opacity-70"
         />

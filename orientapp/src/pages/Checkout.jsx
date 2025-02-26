@@ -12,7 +12,10 @@ const Checkout = ({ cartItems, clearCart }) => {
     address: "",
     city: "",
     paymentMethod: "COD",
+    note: "", // ✅ Add note field
   });
+
+  const [loading, setLoading] = useState(false); // ✅ Manage Loading State
 
   // ✅ Shipping Charges
   const shippingCharge = 200; // Set flat rate shipping charge
@@ -34,6 +37,8 @@ const Checkout = ({ cartItems, clearCart }) => {
       return;
     }
 
+    setLoading(true); // ✅ Show Loading inside the button
+
     const orderData = {
       user: userInfo,
       items: cartItems,
@@ -42,6 +47,7 @@ const Checkout = ({ cartItems, clearCart }) => {
       total: totalPrice,
       status: "Pending",
       timestamp: new Date(),
+      note: userInfo.note, // ✅ Include note in order data
     };
 
     try {
@@ -53,16 +59,18 @@ const Checkout = ({ cartItems, clearCart }) => {
 
       // ✅ Redirect to Home after 2 seconds
       setTimeout(() => {
+        setLoading(false);
         navigate("/");
       }, 2000);
     } catch (error) {
       console.error("Error placing order:", error);
       toast.error("❌ Failed to place order. Please try again!");
+      setLoading(false); // ✅ Hide Loading on Error
     }
   };
 
   return (
-    <div className="container mx-auto py-10 px-6">
+    <div className="container mx-auto py-10 px-6 relative">
       <h2 className="text-3xl font-bold text-center text-red-600">Checkout</h2>
 
       {/* ✅ Order Summary */}
@@ -96,6 +104,19 @@ const Checkout = ({ cartItems, clearCart }) => {
         <input type="text" name="address" placeholder="Address" value={userInfo.address} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
         <input type="text" name="city" placeholder="City" value={userInfo.city} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
         
+        {/* ✅ Note Section */}
+        <div className="mt-4">
+          <label className="font-bold">Additional Notes (Optional)</label>
+          <textarea
+            name="note"
+            placeholder="Add any special instructions or notes..."
+            value={userInfo.note}
+            onChange={handleChange}
+            className="w-full border p-2 rounded mt-2"
+            rows="3"
+          />
+        </div>
+
         {/* ✅ Payment Method */}
         <div className="mt-4">
           <label className="font-bold">Payment Method</label>
@@ -105,8 +126,16 @@ const Checkout = ({ cartItems, clearCart }) => {
         </div>
 
         {/* ✅ Place Order Button */}
-        <button onClick={placeOrder} className="w-full bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 mt-4">
-          Place Order
+        <button
+          onClick={placeOrder}
+          disabled={loading} // Disable the button while loading
+          className="w-full bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 mt-4 flex justify-center items-center"
+        >
+          {loading ? (
+            <img src="/images/LoadingGif.gif" alt="Loading..." className="w-6 h-6" /> // Show loading GIF inside the button
+          ) : (
+            "Place Order" // Show "Place Order" text when not loading
+          )}
         </button>
       </div>
     </div>

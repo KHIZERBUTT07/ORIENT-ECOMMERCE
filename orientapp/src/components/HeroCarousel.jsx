@@ -72,7 +72,7 @@ const HeroCarousel = () => {
               src={image}
               alt={`Banner ${index + 1}`}
               className={`w-full object-cover max-w-full mb-8 ${
-                index === 0 ? "h-[335px]" : "h-auto"
+                index === 0 ? "lg:h-[335px] sm:h-auto": "h-auto"
               }`} 
             />
           </div>
