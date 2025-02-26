@@ -50,16 +50,13 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
     }
   };
 
-  // ✅ Hide search input on Admin, About, Contact, and Shop pages (but keep space on large screens)
+  // ✅ Hide search input on Admin, About, Contact, Shop, and Membership pages (but keep space on large screens)
   const hideSearchInput =
     isAdminPage ||
     location.pathname === "/about" ||
     location.pathname === "/contact" ||
-    location.pathname === "/shop";
-
-  // ✅ Active Link Styling
-  const isActive = (path) =>
-    location.pathname === path ? "text-red-500 font-bold" : "text-black hover:text-red-500";
+    location.pathname === "/shop" ||
+    location.pathname === "/membership";
 
   return (
     <nav className="bg-white shadow-md py-4 relative z-50">
@@ -69,26 +66,27 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
           <img src={logo} alt="Orient Appliances" className="h-10" />
         </Link>
 
-        {/* ✅ Desktop Menu */}
-        <div className="hidden md:flex space-x-6">
+        {/* ✅ Desktop & Tablet Menu (Hidden below 1024px) */}
+        <div className="hidden lg:flex space-x-6">
           {isAdminAuthenticated && isAdminPage ? (
             <>
-              <Link to="/admin" className={isActive("/admin")}>Dashboard</Link>
-              <Link to="/admin/orders" className={isActive("/admin/orders")}>Orders</Link>
-              <Link to="/admin/memberships" className={isActive("/admin/memberships")}>Memberships</Link>
+              <Link to="/admin" className="hover:text-red-600">Dashboard</Link>
+              <Link to="/admin/orders" className="hover:text-red-600">Orders</Link>
+              <Link to="/admin/memberships" className="hover:text-red-600">Memberships</Link>
             </>
           ) : (
             <>
-              <Link to="/" className={isActive("/")}>Home</Link>
-              <Link to="/shop" className={isActive("/shop")}>Products</Link>
-              <Link to="/about" className={isActive("/about")}>Who We Are</Link>
-              <Link to="/contact" className={isActive("/contact")}>Contact</Link>
+              <Link to="/" className="hover:text-red-600">Home</Link>
+              <Link to="/shop" className="hover:text-red-600">Products</Link>
+              <Link to="/about" className="hover:text-red-600">Who We Are</Link>
+              <Link to="/contact" className="hover:text-red-600">Contact</Link>
+              <Link to="/membership" className="hover:text-red-600">Get Membership</Link> {/* ✅ Membership Link */}
             </>
           )}
         </div>
 
-        {/* ✅ Search Input - Hidden on Admin, About, Contact, and Shop Pages but still occupies space */}
-        <div className={`hidden md:flex relative ${hideSearchInput ? "invisible w-48" : "w-auto"}`}>
+        {/* ✅ Search Input - Visible on Desktop (Hidden on Membership, Admin, and Other Pages) */}
+        <div className={`hidden lg:flex relative ${hideSearchInput ? "invisible w-48" : "w-auto"}`}>
           {!hideSearchInput && (
             <form onSubmit={handleSearch} className="relative">
               <input
@@ -146,16 +144,16 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
             </button>
           )}
 
-          {/* ✅ Hamburger Menu for Mobile */}
-          <button className="md:hidden text-2xl text-red-600" onClick={() => setMenuOpen(!menuOpen)}>
+          {/* ✅ Hamburger Menu for Mobile & Tablet (Visible up to 1023px) */}
+          <button className="lg:hidden text-2xl text-red-600" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
       </div>
 
-      {/* ✅ Mobile Menu (Dropdown) */}
+      {/* ✅ Mobile Menu (Dropdown, Visible up to 1023px) */}
       {menuOpen && (
-        <div className="absolute top-16 left-0 w-full bg-white shadow-md flex flex-col items-center py-4 md:hidden">
+        <div className="absolute top-16 left-0 w-full bg-white shadow-md flex flex-col items-center py-4 lg:hidden">
           {isAdminAuthenticated && isAdminPage ? (
             <>
               <Link to="/admin" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Dashboard</Link>
@@ -168,10 +166,11 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
               <Link to="/shop" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Products</Link>
               <Link to="/about" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Who We Are</Link>
               <Link to="/contact" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Contact</Link>
+              <Link to="/membership" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Get Membership</Link>
             </>
           )}
 
-          {/* ✅ Search Bar in Mobile Menu (Only on Home Page) */}
+          {/* ✅ Mobile Search - Visible ONLY on Home Page */}
           {location.pathname === "/" && (
             <form onSubmit={handleSearch} className="relative w-3/4 mt-4">
               <input
@@ -185,13 +184,6 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
                 <FaSearch />
               </button>
             </form>
-          )}
-
-          {/* ✅ Logout Button in Mobile Menu if Admin is Logged In */}
-          {isAdminAuthenticated && isAdminPage && (
-            <button onClick={handleLogout} className="mt-4 text-lg text-red-600 hover:text-red-800">
-              Logout
-            </button>
           )}
         </div>
       )}
