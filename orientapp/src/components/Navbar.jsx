@@ -72,7 +72,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
             <>
               <Link to="/admin" className="hover:text-red-600">Dashboard</Link>
               <Link to="/admin/orders" className="hover:text-red-600">Orders</Link>
-              <Link to="/admin/memberships" className="hover:text-red-600">Memberships</Link>
+              <Link to="/admin/memberships" className="hover:text-red-600">Dealerships</Link>
             </>
           ) : (
             <>
@@ -80,7 +80,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
               <Link to="/shop" className="hover:text-red-600">Products</Link>
               <Link to="/about" className="hover:text-red-600">Who We Are</Link>
               <Link to="/contact" className="hover:text-red-600">Contact</Link>
-              <Link to="/membership" className="hover:text-red-600">Get Membership</Link> {/* ✅ Membership Link */}
+              <Link to="/membership" className="hover:text-red-600">Get Dealership</Link> {/* ✅ Membership Link */}
             </>
           )}
         </div>
@@ -158,7 +158,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
             <>
               <Link to="/admin" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Dashboard</Link>
               <Link to="/admin/orders" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Orders</Link>
-              <Link to="/admin/memberships" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Memberships</Link>
+              <Link to="/admin/memberships" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Dealerships</Link>
             </>
           ) : (
             <>
@@ -166,7 +166,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
               <Link to="/shop" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Products</Link>
               <Link to="/about" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Who We Are</Link>
               <Link to="/contact" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Contact</Link>
-              <Link to="/membership" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Get Membership</Link>
+              <Link to="/membership" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Get Dealership</Link>
             </>
           )}
 
@@ -192,3 +192,4 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
 };
 
 export default Navbar;
+

@@ -39,18 +39,21 @@ const Shop = ({ addToCart }) => {
   useEffect(() => {
     let updatedProducts = [...products];
 
+    // 🔍 Search Filtering
     if (searchQuery) {
       updatedProducts = updatedProducts.filter((product) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
+    // 📂 Category Filtering
     if (selectedCategory !== "all") {
       updatedProducts = updatedProducts.filter(
         (product) => product.category === selectedCategory
       );
     }
 
+    // 🔼🔽 Sorting by Price
     if (sortOrder === "lowToHigh") {
       updatedProducts.sort((a, b) => a.price - b.price);
     } else if (sortOrder === "highToLow") {
@@ -58,7 +61,7 @@ const Shop = ({ addToCart }) => {
     }
 
     setFilteredProducts(updatedProducts);
-    setCurrentPage(1);
+    setCurrentPage(1); // ✅ Reset pagination when filters change
   }, [searchQuery, selectedCategory, sortOrder, products]);
 
   // ✅ Get Unique Categories
@@ -70,6 +73,7 @@ const Shop = ({ addToCart }) => {
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
+  // ✅ Handle Pagination Click
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
@@ -145,8 +149,8 @@ const Shop = ({ addToCart }) => {
             </select>
           </div>
 
-          {/* ✅ Product Grid - Ensures 2 Products Per Row on Mobile */}
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* ✅ Product Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {currentProducts.length > 0 ? (
               currentProducts.map((product) => (
                 <div key={product.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative flex flex-col p-4">

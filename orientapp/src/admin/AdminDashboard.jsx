@@ -1,226 +1,183 @@
-import React, { useState, useEffect } from "react";
-import { db, storage } from "../firebaseConfig"; // ✅ Firebase Config Import
-import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { FaPlus, FaTrash } from "react-icons/fa";
+import React, { useState } from "react";
+import { db, storage } from "../firebaseConfig"; // ✅ Import Firebase
+import { collection, addDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { toast } from "react-toastify";
 
 const AdminDashboard = () => {
-  const [products, setProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    price: "",
-    oldPrice: "",
+  const [formData, setFormData] = useState({
+    productName: "",
     category: "",
-    image: "",
+    oldPrice: "",
     discount: "",
-    banner: "",
+    discountedPrice: "",
+    metaTitle: "",
+    metaDescription: "",
+    metaKeywords: [],
     description: "",
-    specs: {
-      size: "",
-      blades: "",
-      motorType: "",
-      material: "",
-      wire: "",
-      speedSettings: "",
-      powerConsumption: "",
-    },
-    features: [],
-    featureInput: "",
+    features: "",
+    specs: "",
     warranty: "",
+    youtubeURL: "",
+    stock: "",
+    productImage: null,
+    bannerImage: null,
   });
 
-  // ✅ Load Products from Firebase
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "products"));
-        const productList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setProducts(productList);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-    fetchProducts();
-  }, []);
+  const [loading, setLoading] = useState(false);
 
   // ✅ Handle Input Changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewProduct((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // ✅ Handle Specs Changes
-  const handleSpecsChange = (e) => {
-    const { name, value } = e.target;
-    setNewProduct((prev) => ({
-      ...prev,
-      specs: {
-        ...prev.specs,
-        [name]: value,
-      },
-    }));
-  };
-
-  // ✅ Handle Image Upload to Firebase Storage
-  const handleImageUpload = async (e, type) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        const storageRef = ref(storage, `products/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const imageUrl = await getDownloadURL(storageRef);
-        setNewProduct((prev) => ({ ...prev, [type]: imageUrl }));
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
+  const handleChange = (e) => {
+    if (e.target.type === "file") {
+      setFormData({ ...formData, [e.target.name]: e.target.files[0] });
+    } else if (e.target.name === "discount") {
+      const discount = e.target.value;
+      const discountedPrice =
+        formData.oldPrice && discount
+          ? (formData.oldPrice - (formData.oldPrice * discount) / 100).toFixed(2)
+          : "";
+      setFormData({ ...formData, discount, discountedPrice });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
     }
   };
 
-  // ✅ Handle Adding Features (Fixed)
-  const handleAddFeature = () => {
-    if (newProduct.featureInput.trim() !== "") {
-      setNewProduct((prev) => ({
-        ...prev,
-        features: [...prev.features, prev.featureInput.trim()],
-        featureInput: "", // ✅ Clear input field after adding
-      }));
-    }
+  // ✅ Handle Meta Keywords
+  const handleKeywordsChange = (e) => {
+    setFormData({
+      ...formData,
+      metaKeywords: e.target.value.split(",").map((keyword) => keyword.trim()),
+    });
   };
 
-  // ✅ Handle Removing Features
-  const handleRemoveFeature = (index) => {
-    setNewProduct((prev) => ({
-      ...prev,
-      features: prev.features.filter((_, i) => i !== index),
-    }));
+  // ✅ Upload Image to Firebase Storage
+  const uploadImage = async (file, folder) => {
+    return new Promise((resolve, reject) => {
+      const storageRef = ref(storage, `${folder}/${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        null,
+        (error) => reject(error),
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve(downloadURL);
+        }
+      );
+    });
   };
 
-  // ✅ Handle Add Product to Firebase
-  const handleAddProduct = async () => {
-    if (!newProduct.name || !newProduct.price || !newProduct.category || !newProduct.image || !newProduct.banner) {
-      alert("Please fill in all required fields.");
+  // ✅ Handle Product Submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.productName || !formData.category || !formData.oldPrice || !formData.discount || !formData.stock || !formData.productImage || !formData.bannerImage) {
+      toast.error("⚠️ Please fill all required fields & upload images!");
       return;
     }
 
-    const productData = { ...newProduct };
-    delete productData.featureInput;
-
     try {
-      const docRef = await addDoc(collection(db, "products"), productData);
-      setProducts([...products, { id: docRef.id, ...productData }]);
-      alert("Product Added Successfully!");
+      setLoading(true);
+      const productImageURL = await uploadImage(formData.productImage, "productImages");
+      const bannerImageURL = await uploadImage(formData.bannerImage, "productBanners");
 
-      setNewProduct({
-        name: "",
-        price: "",
-        oldPrice: "",
+      const productRef = collection(db, "products");
+      await addDoc(productRef, {
+        productName: formData.productName,
+        category: formData.category,
+        oldPrice: parseFloat(formData.oldPrice),
+        discount: parseFloat(formData.discount),
+        discountedPrice: parseFloat(formData.discountedPrice),
+        metaTitle: formData.metaTitle,
+        metaDescription: formData.metaDescription,
+        metaKeywords: formData.metaKeywords,
+        description: formData.description,
+        features: formData.features,
+        specs: formData.specs,
+        warranty: formData.warranty,
+        youtubeURL: formData.youtubeURL,
+        stock: parseInt(formData.stock),
+        productImage: productImageURL,
+        bannerImage: bannerImageURL,
+        timestamp: new Date(),
+      });
+
+      toast.success("✅ Product added successfully!");
+      setFormData({
+        productName: "",
         category: "",
-        image: "",
+        oldPrice: "",
         discount: "",
-        banner: "",
+        discountedPrice: "",
+        metaTitle: "",
+        metaDescription: "",
+        metaKeywords: [],
         description: "",
-        specs: {
-          size: "",
-          blades: "",
-          motorType: "",
-          material: "",
-          wire: "",
-          speedSettings: "",
-          powerConsumption: "",
-        },
-        features: [],
-        featureInput: "",
+        features: "",
+        specs: "",
         warranty: "",
+        youtubeURL: "",
+        stock: "",
+        productImage: null,
+        bannerImage: null,
       });
     } catch (error) {
       console.error("Error adding product:", error);
+      toast.error("❌ Failed to add product!");
+    } finally {
+      setLoading(false);
     }
   };
-
-  // ✅ Handle Delete Product from Firebase
-  const handleDeleteProduct = async (id) => {
-    try {
-      await deleteDoc(doc(db, "products", id));
-      setProducts(products.filter((product) => product.id !== id));
-      alert("Product Deleted Successfully!");
-    } catch (error) {
-      console.error("Error deleting product:", error);
-    }
-  };
-  
 
   return (
     <div className="container mx-auto py-10 px-6">
-      <h2 className="text-4xl font-bold text-center text-red-600 mb-8">Admin Dashboard - Manage Products</h2>
+      <h2 className="text-3xl font-bold text-center text-red-600">Add New Product</h2>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* ✅ Left: Form to Add New Product */}
-        <div className="border p-6 rounded-lg shadow-lg bg-white">
-          <h3 className="text-2xl font-bold mb-4 text-gray-700">Add Product</h3>
-
-          <input type="text" name="name" placeholder="Product Name" value={newProduct.name} onChange={handleInputChange} className="w-full border p-2 rounded mb-2" />
-          <input type="number" name="price" placeholder="Price" value={newProduct.price} onChange={handleInputChange} className="w-full border p-2 rounded mb-2" />
-          <input type="number" name="oldPrice" placeholder="Old Price" value={newProduct.oldPrice} onChange={handleInputChange} className="w-full border p-2 rounded mb-2" />
-          <input type="text" name="category" placeholder="Category" value={newProduct.category} onChange={handleInputChange} className="w-full border p-2 rounded mb-2" />
-          <input type="text" name="discount" placeholder="Discount %" value={newProduct.discount} onChange={handleInputChange} className="w-full border p-2 rounded mb-2" />
-          <textarea name="description" placeholder="Product Description" value={newProduct.description} onChange={handleInputChange} className="w-full border p-2 rounded mb-2"></textarea>
-
-          {/* ✅ Image Upload */}
-          <label className="block font-bold">Product Image:</label>
-          <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, "image")} className="mb-2" />
-
-          {/* ✅ Banner Upload */}
-          <label className="block font-bold">Product Banner:</label>
-          <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, "banner")} className="mb-2" />
-              
-               {/* ✅ Specs */}
-          <h4 className="font-bold mt-4">Specifications</h4>
-          {Object.keys(newProduct.specs).map((key) => (
-            <input key={key} type="text" name={key} placeholder={key} value={newProduct.specs[key]} onChange={handleSpecsChange} className="w-full border p-2 rounded mb-2" />
-          ))}
-
-          {/* ✅ Features */}
-          <h4 className="font-bold mt-4">Features</h4>
-          <div className="flex">
-            <input type="text" placeholder="Enter Feature" value={newProduct.featureInput} onChange={(e) => setNewProduct({ ...newProduct, featureInput: e.target.value })} className="w-full border p-2 rounded mb-2" />
-            <button onClick={handleAddFeature} className="ml-2 bg-blue-500 text-white px-4 py-2 rounded mb-2">
-              <FaPlus />
-            </button>
-          </div>
-          <ul className="list-disc pl-6">
-            {newProduct.features.map((feature, index) => (
-              <li key={index} className="flex justify-between">
-                {feature}
-                <button onClick={() => handleRemoveFeature(index)} className="text-red-500"><FaTrash /></button>
-              </li>
-            ))}
-          </ul>
-                       {/* ✅ Warranty Input */}
-          <h4 className="font-bold mt-4">Warranty (Years)</h4>
-          <input type="text" name="warranty" placeholder="Warranty Period" value={newProduct.warranty} onChange={handleInputChange} className="w-full border p-2 rounded mb-2" />
-
-          {/* ✅ Submit Button */}
-          <button onClick={handleAddProduct} className="w-full bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 mt-4">
-            Add Product
-          </button>
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md mt-6 space-y-6">
+        {/* ✅ Product Info Section */}
+        <div>
+          <h3 className="text-xl font-bold mb-2">Product Info</h3>
+          <input type="text" name="productName" placeholder="Product Name" value={formData.productName} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+          <select name="category" value={formData.category} onChange={handleChange} className="w-full border p-2 rounded mb-2" required>
+            <option value="">Select Category</option>
+            <option value="Fans">Fans</option>
+            <option value="Geysers">Geysers</option>
+            <option value="Irons">Irons</option>
+            <option value="Hob">Hob</option>
+            <option value="Range Hoods">Range Hoods</option>
+          </select>
+          <input type="number" name="oldPrice" placeholder="Old Price" value={formData.oldPrice} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+          <input type="number" name="discount" placeholder="Discount (%)" value={formData.discount} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+          <input type="number" name="discountedPrice" placeholder="Discounted Price" value={formData.discountedPrice} readOnly className="w-full border p-2 rounded mb-2 bg-gray-200" />
         </div>
 
-        {/* ✅ Right: List of Existing Products */}
-        <div className="border p-6 rounded-lg shadow-lg bg-gray-100">
-          <h3 className="text-2xl font-bold mb-4 text-gray-700">Existing Products</h3>
-          <ul>
-            {products.map((product) => (
-              <li key={product.id} className="border p-4 rounded shadow-md flex justify-between">
-                <span>{product.name}</span>
-                <button onClick={() => handleDeleteProduct(product.id)} className="text-red-500"><FaTrash /></button>
-              </li>
-            ))}
-          </ul>
+        {/* ✅ Product SEO Section */}
+        <div>
+          <h3 className="text-xl font-bold mb-2">Product SEO</h3>
+          <input type="text" name="metaTitle" placeholder="Meta Title" value={formData.metaTitle} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
+          <textarea name="metaDescription" placeholder="Meta Description" value={formData.metaDescription} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
+          <input type="text" name="metaKeywords" placeholder="Meta Keywords (comma-separated)" value={formData.metaKeywords.join(", ")} onChange={handleKeywordsChange} className="w-full border p-2 rounded mb-2" />
         </div>
-      </div>
+
+        {/* ✅ Product Details Section */}
+        <div>
+          <h3 className="text-xl font-bold mb-2">Product Details</h3>
+          <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
+          <textarea name="features" placeholder="Features" value={formData.features} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
+          <textarea name="specs" placeholder="Specifications" value={formData.specs} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
+          <input type="text" name="warranty" placeholder="Warranty" value={formData.warranty} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
+          <input type="text" name="youtubeURL" placeholder="YouTube Video URL" value={formData.youtubeURL} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
+          <input type="number" name="stock" placeholder="Stock Available" value={formData.stock} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+          <input type="file" name="productImage" accept="image/*" onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+          <input type="file" name="bannerImage" accept="image/*" onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+        </div>
+
+        {/* ✅ Submit Button */}
+        <button type="submit" className="w-full bg-red-600 text-white p-3 rounded-lg hover:bg-red-700">
+          {loading ? "Saving..." : "Save Product"}
+        </button>
+      </form>
     </div>
   );
 };

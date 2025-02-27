@@ -20,6 +20,9 @@ import { ToastContainer, toast } from "react-toastify";
 import ShopCategoryPage from "./pages/ShopCategoryPage";
 import AdminMembership from "./admin/AdminMembership";
 import Membership from "./pages/Membership";
+import DealerDashboard from "./pages/DealerDashboard";
+import AdminActiveProducts from "./admin/AdminActiveProducts";
+import EditProduct from "./admin/EditProduct";
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -157,11 +160,17 @@ const App = () => {
         {/* ✅ Membership Page */}
         <Route path="/membership" element={<Membership />} />
 
+         {/* ✅ Dealers Page */}
+        <Route path="/dealer-dashboard" element={<DealerDashboard />} />
+
         {/* ✅ Admin Routes (Protected) */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} />} />
         <Route path="/admin/orders" element={<ProtectedRoute element={<AdminOrders />} />} />
         <Route path="/admin/memberships" element={<ProtectedRoute element={<AdminMembership />} />} />
+        <Route path="/admin/active-products" element={<AdminActiveProducts />} />
+        <Route path="/admin/edit-product/:id" element={<EditProduct />} />
+
 
 
         {/* ✅ Category Routes */}

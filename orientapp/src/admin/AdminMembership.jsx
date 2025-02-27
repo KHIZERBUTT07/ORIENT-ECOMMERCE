@@ -6,6 +6,9 @@ import { toast } from "react-toastify";
 const AdminMembership = () => {
   const [memberships, setMemberships] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dealerId, setDealerId] = useState("");
+  const [dealerPassword, setDealerPassword] = useState("");
+  const [selectedMemberId, setSelectedMemberId] = useState(null);
 
   // ✅ Fetch Membership Requests
   useEffect(() => {
@@ -28,19 +31,31 @@ const AdminMembership = () => {
     fetchMemberships();
   }, []);
 
-  // ✅ Accept Membership
+  // ✅ Accept Membership (With Dealer ID & Password)
   const acceptMembership = async (id) => {
+    if (!dealerId || !dealerPassword) {
+      toast.error("⚠️ Please enter a Dealer ID and Password!");
+      return;
+    }
+
     try {
       const membershipRef = doc(db, "membershipRequests", id);
-      await updateDoc(membershipRef, { status: "Accepted" });
+      await updateDoc(membershipRef, {
+        status: "Accepted",
+        dealerId,
+        dealerPassword,
+      });
 
       setMemberships((prev) =>
         prev.map((member) =>
-          member.id === id ? { ...member, status: "Accepted" } : member
+          member.id === id ? { ...member, status: "Accepted", dealerId, dealerPassword } : member
         )
       );
 
-      toast.success("✅ Membership Accepted!");
+      toast.success("✅ Membership Accepted with Dealer ID & Password!");
+      setDealerId("");
+      setDealerPassword("");
+      setSelectedMemberId(null);
     } catch (error) {
       console.error("Error accepting membership:", error);
       toast.error("❌ Failed to accept membership.");
@@ -73,170 +88,108 @@ const AdminMembership = () => {
         <div className="overflow-x-auto">
           <h3 className="text-xl font-bold text-gray-700 mb-4 text-center">Pending Membership Requests</h3>
 
-          {/* ✅ Table for Big Screens */}
-          <div className="hidden sm:block">
-            <table className="w-full border border-gray-300 bg-white text-sm sm:text-base">
-              <thead>
-                <tr className="bg-gray-200 text-gray-800">
-                  <th className="border p-3">Dealer Name</th>
-                  <th className="border p-3">Phone</th>
-                  <th className="border p-3 hidden sm:table-cell">Email</th>
-                  <th className="border p-3">Shop Pic</th>
-                  <th className="border p-3">Shop Card</th>
-                  <th className="border p-3">Status</th>
-                  <th className="border p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {memberships
-                  .filter((member) => member.status === "Pending")
-                  .map((member) => (
-                    <tr key={member.id} className="border text-center">
-                      <td className="p-3">{member.dealerName}</td>
-                      <td className="p-3">{member.phone}</td>
-                      <td className="p-3 hidden sm:table-cell">{member.email}</td>
-                      <td className="p-3">
-                        <a href={member.shopPic} target="_blank" rel="noopener noreferrer">
-                          <img
-                            src={member.shopPic}
-                            alt="Shop Pic"
-                            className="w-16 h-16 sm:w-24 sm:h-24 object-contain rounded-md mx-auto shadow-md"
-                          />
-                        </a>
-                      </td>
-                      <td className="p-3">
-                        <a href={member.shopCard} target="_blank" rel="noopener noreferrer">
-                          <img
-                            src={member.shopCard}
-                            alt="Shop Card"
-                            className="w-16 h-16 sm:w-24 sm:h-24 object-contain rounded-md mx-auto shadow-md"
-                          />
-                        </a>
-                      </td>
-                      <td className="p-3 font-bold">{member.status}</td>
-                      <td className="p-3 flex flex-col sm:flex-row justify-center gap-2">
-                        <button
-                          onClick={() => acceptMembership(member.id)}
-                          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition w-full sm:w-auto"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => rejectMembership(member.id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition w-full sm:w-auto"
-                        >
-                          Reject
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* ✅ Mobile View */}
-          <div className="sm:hidden">
-            {memberships
-              .filter((member) => member.status === "Pending")
-              .map((member) => (
-                <div key={member.id} className="border p-4 rounded-lg shadow-md bg-white mb-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
-                      <p className="font-bold">Dealer Name:</p>
-                      <p>{member.dealerName}</p>
-                    </div>
-                    <div>
-                      <p className="font-bold">Phone:</p>
-                      <p>{member.phone}</p>
-                    </div>
-                    <div>
-                      <p className="font-bold">Status:</p>
-                      <p className="font-bold">{member.status}</p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="font-bold">Shop Pic:</p>
-                      <a href={member.shopPic} target="_blank" rel="noopener noreferrer">
-                        <img
-                          src={member.shopPic}
-                          alt="Shop Pic"
-                          className="w-full max-h-48 object-contain rounded-md shadow-md"
-                        />
-                      </a>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="font-bold">Shop Card:</p>
-                      <a href={member.shopCard} target="_blank" rel="noopener noreferrer">
-                        <img
-                          src={member.shopCard}
-                          alt="Shop Card"
-                          className="w-full max-h-48 object-contain rounded-md shadow-md"
-                        />
-                      </a>
-                    </div>
-                    <div className="col-span-2 flex gap-2">
+          {/* ✅ Table for Pending Requests */}
+          <table className="w-full border border-gray-300 bg-white text-sm sm:text-base">
+            <thead>
+              <tr className="bg-gray-200 text-gray-800">
+                <th className="border p-3">Dealer Name</th>
+                <th className="border p-3">Phone</th>
+                <th className="border p-3">Email</th>
+                <th className="border p-3">Status</th>
+                <th className="border p-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {memberships
+                .filter((member) => member.status === "Pending")
+                .map((member) => (
+                  <tr key={member.id} className="border text-center">
+                    <td className="p-3">{member.dealerName}</td>
+                    <td className="p-3">{member.phone}</td>
+                    <td className="p-3">{member.email}</td>
+                    <td className="p-3 font-bold">{member.status}</td>
+                    <td className="p-3 flex flex-col sm:flex-row justify-center gap-2">
                       <button
-                        onClick={() => acceptMembership(member.id)}
-                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition w-full"
+                        onClick={() => setSelectedMemberId(member.id)}
+                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition w-full sm:w-auto"
                       >
                         Accept
                       </button>
                       <button
                         onClick={() => rejectMembership(member.id)}
-                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition w-full"
+                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition w-full sm:w-auto"
                       >
                         Reject
                       </button>
-                    </div>
-                  </div>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+
+          {/* ✅ Accept Membership Modal */}
+          {selectedMemberId && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                <h3 className="text-xl font-bold text-center text-red-600 mb-4">Assign Dealer Credentials</h3>
+                <input
+                  type="text"
+                  placeholder="Enter Dealer ID"
+                  value={dealerId}
+                  onChange={(e) => setDealerId(e.target.value)}
+                  className="w-full border p-2 rounded mb-2"
+                />
+                <input
+                  type="text"
+                  placeholder="Enter Dealer Password"
+                  value={dealerPassword}
+                  onChange={(e) => setDealerPassword(e.target.value)}
+                  className="w-full border p-2 rounded mb-2"
+                />
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={() => acceptMembership(selectedMemberId)}
+                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
+                  >
+                    Confirm Accept
+                  </button>
+                  <button
+                    onClick={() => setSelectedMemberId(null)}
+                    className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500 transition"
+                  >
+                    Cancel
+                  </button>
                 </div>
-              ))}
-          </div>
+              </div>
+            </div>
+          )}
 
           {/* ✅ Accepted Members Section */}
           <h3 className="text-xl font-bold text-green-700 mt-8 text-center">Accepted Members</h3>
-
-          <div className="hidden sm:block">
-            <table className="w-full border border-gray-300 bg-white text-sm sm:text-base mt-4">
-              <thead>
-                <tr className="bg-green-200 text-gray-800">
-                  <th className="border p-3">Dealer Name</th>
-                  <th className="border p-3">Phone</th>
-                  <th className="border p-3 hidden sm:table-cell">Email</th>
-                </tr>
-              </thead>
-              <tbody>
-                {memberships
-                  .filter((member) => member.status === "Accepted")
-                  .map((member) => (
-                    <tr key={member.id} className="border text-center">
-                      <td className="p-3">{member.dealerName}</td>
-                      <td className="p-3">{member.phone}</td>
-                      <td className="p-3 hidden sm:table-cell">{member.email}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* ✅ Mobile View for Accepted Members */}
-          <div className="sm:hidden">
-            {memberships
-              .filter((member) => member.status === "Accepted")
-              .map((member) => (
-                <div key={member.id} className="border p-4 rounded-lg shadow-md bg-white mb-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="font-bold">Dealer Name:</p>
-                      <p>{member.dealerName}</p>
-                    </div>
-                    <div>
-                      <p className="font-bold">Phone:</p>
-                      <p>{member.phone}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
+          <table className="w-full border border-gray-300 bg-white text-sm sm:text-base mt-4">
+            <thead>
+              <tr className="bg-green-200 text-gray-800">
+                <th className="border p-3">Dealer Name</th>
+                <th className="border p-3">Phone</th>
+                <th className="border p-3">Email</th>
+                <th className="border p-3">Dealer ID</th>
+                <th className="border p-3">Password</th>
+              </tr>
+            </thead>
+            <tbody>
+              {memberships
+                .filter((member) => member.status === "Accepted")
+                .map((member) => (
+                  <tr key={member.id} className="border text-center">
+                    <td className="p-3">{member.dealerName}</td>
+                    <td className="p-3">{member.phone}</td>
+                    <td className="p-3">{member.email}</td>
+                    <td className="p-3 font-bold">{member.dealerId}</td>
+                    <td className="p-3 font-bold">{member.dealerPassword}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

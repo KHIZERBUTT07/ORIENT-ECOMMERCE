@@ -22,3 +22,25 @@ status approved or not
 quantity order min10,
 
 
+
+dealership login page ,
+the discount page
+
+
+order creation page in admin 
+admin can add employees 
+
+another admin page only for one person
+
+
+boosting skus for showing products on fron top selling products 
+with csv file
+
+categories management page in admin 
+
+compaign  page in admin
+
+product detail page new
+
+filteration product in admin
+
