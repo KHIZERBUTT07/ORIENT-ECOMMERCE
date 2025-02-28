@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { db, storage } from "../firebaseConfig"; // ✅ Import Firebase
+import { db, storage } from "../firebaseConfig"; // ✅ Firebase Config
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { toast } from "react-toastify";
@@ -13,7 +13,7 @@ const AdminDashboard = () => {
     discountedPrice: "",
     metaTitle: "",
     metaDescription: "",
-    metaKeywords: [],
+    metaKeywords: "",
     description: "",
     features: "",
     specs: "",
@@ -71,17 +71,39 @@ const AdminDashboard = () => {
   // ✅ Handle Product Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.productName || !formData.category || !formData.oldPrice || !formData.discount || !formData.stock || !formData.productImage || !formData.bannerImage) {
-      toast.error("⚠️ Please fill all required fields & upload images!");
+  
+    // ✅ Validate Required Fields
+    const requiredFields = [
+      "productName",
+      "category",
+      "oldPrice",
+      "discount",
+      "stock",
+      "description",
+      "features",
+      "specs",
+      "warranty",
+      "youtubeURL",
+      "metaTitle",
+      "metaDescription",
+      "metaKeywords",
+      "productImage",
+      "bannerImage",
+    ];
+  
+    const missingFields = requiredFields.filter((field) => !formData[field]);
+  
+    if (missingFields.length > 0) {
+      toast.error(`⚠️ Please fill all required fields: ${missingFields.join(", ")}`);
       return;
     }
-
+  
     try {
       setLoading(true);
+  
       const productImageURL = await uploadImage(formData.productImage, "productImages");
       const bannerImageURL = await uploadImage(formData.bannerImage, "productBanners");
-
+  
       const productRef = collection(db, "products");
       await addDoc(productRef, {
         productName: formData.productName,
@@ -91,10 +113,10 @@ const AdminDashboard = () => {
         discountedPrice: parseFloat(formData.discountedPrice),
         metaTitle: formData.metaTitle,
         metaDescription: formData.metaDescription,
-        metaKeywords: formData.metaKeywords,
+        metaKeywords: Array.isArray(formData.metaKeywords) ? formData.metaKeywords : formData.metaKeywords.split(","), // ✅ Fix Here
         description: formData.description,
-        features: formData.features,
-        specs: formData.specs,
+        features: formData.features.split("\n"), // ✅ Convert Features to Array
+        specs: formData.specs ? JSON.parse(formData.specs) : {}, // ✅ Fix Here
         warranty: formData.warranty,
         youtubeURL: formData.youtubeURL,
         stock: parseInt(formData.stock),
@@ -102,7 +124,7 @@ const AdminDashboard = () => {
         bannerImage: bannerImageURL,
         timestamp: new Date(),
       });
-
+  
       toast.success("✅ Product added successfully!");
       setFormData({
         productName: "",
@@ -112,7 +134,7 @@ const AdminDashboard = () => {
         discountedPrice: "",
         metaTitle: "",
         metaDescription: "",
-        metaKeywords: [],
+        metaKeywords: "",
         description: "",
         features: "",
         specs: "",
@@ -129,6 +151,7 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="container mx-auto py-10 px-6">
@@ -152,28 +175,35 @@ const AdminDashboard = () => {
           <input type="number" name="discountedPrice" placeholder="Discounted Price" value={formData.discountedPrice} readOnly className="w-full border p-2 rounded mb-2 bg-gray-200" />
         </div>
 
-        {/* ✅ Product SEO Section */}
+        {/* ✅ SEO Section */}
         <div>
           <h3 className="text-xl font-bold mb-2">Product SEO</h3>
           <input type="text" name="metaTitle" placeholder="Meta Title" value={formData.metaTitle} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
           <textarea name="metaDescription" placeholder="Meta Description" value={formData.metaDescription} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-          <input type="text" name="metaKeywords" placeholder="Meta Keywords (comma-separated)" value={formData.metaKeywords.join(", ")} onChange={handleKeywordsChange} className="w-full border p-2 rounded mb-2" />
+          <input type="text" name="metaKeywords" placeholder="Meta Keywords (comma-separated)" value={formData.metaKeywords} onChange={handleKeywordsChange} className="w-full border p-2 rounded mb-2" />
         </div>
 
         {/* ✅ Product Details Section */}
-        <div>
-          <h3 className="text-xl font-bold mb-2">Product Details</h3>
-          <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-          <textarea name="features" placeholder="Features" value={formData.features} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-          <textarea name="specs" placeholder="Specifications" value={formData.specs} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-          <input type="text" name="warranty" placeholder="Warranty" value={formData.warranty} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-          <input type="text" name="youtubeURL" placeholder="YouTube Video URL" value={formData.youtubeURL} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-          <input type="number" name="stock" placeholder="Stock Available" value={formData.stock} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+<div>
+  <h3 className="text-xl font-bold mb-2">Product Details</h3>
+  <textarea name="description" placeholder="Product Description" value={formData.description} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+  <textarea name="features" placeholder="Product Features (Each line will be a bullet point)" value={formData.features} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+  <textarea name="specs" placeholder="Product Specifications (JSON format)" value={formData.specs} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+  <input type="text" name="warranty" placeholder="Warranty (e.g., 1 Year Brand Warranty)" value={formData.warranty} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+  <input type="text" name="youtubeURL" placeholder="YouTube Video URL (Optional)" value={formData.youtubeURL} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
+  <input type="number" name="stock" placeholder="Stock Available" value={formData.stock} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+</div>
+
+       {/* ✅ Product Images Section */}
+       <div>
+          <h3 className="text-xl font-bold mb-2">Product Images</h3>
+          <label className="block font-bold mb-1">Choose Product Image</label>
           <input type="file" name="productImage" accept="image/*" onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+
+          <label className="block font-bold mb-1">Choose Banner Image</label>
           <input type="file" name="bannerImage" accept="image/*" onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
         </div>
 
-        {/* ✅ Submit Button */}
         <button type="submit" className="w-full bg-red-600 text-white p-3 rounded-lg hover:bg-red-700">
           {loading ? "Saving..." : "Save Product"}
         </button>

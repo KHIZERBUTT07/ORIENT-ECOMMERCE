@@ -3,8 +3,9 @@ import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const CartPage = ({ cart, removeFromCart, increaseQuantity, decreaseQuantity }) => {
-  const totalPrice = cart.reduce((total, product) => total + product.price * product.quantity, 0);
-  const shippingFee = cart.length > 0 ? 200 : 0; // ✅ Shipping Fee (200 PKR if cart is not empty)
+  // ✅ Calculate Total Price Based on Discounted Price
+  const totalPrice = cart.reduce((total, product) => total + (product.discountedPrice || product.price) * product.quantity, 0);
+  const shippingFee = 0; // ✅ Free Shipping
   const overallTotal = totalPrice + shippingFee; // ✅ Overall Total
 
   return (
@@ -19,11 +20,11 @@ const CartPage = ({ cart, removeFromCart, increaseQuantity, decreaseQuantity }) 
           <div className="space-y-4">
             {cart.map((product) => (
               <div key={product.id} className="flex items-center border p-4 rounded-md shadow-sm">
-                <img src={product.image} alt={product.name} className="w-24 h-24 object-contain" />
+                <img src={product.productImage || product.image} alt={product.productName || product.name} className="w-24 h-24 object-contain" />
                 <div className="flex-1 ml-4">
-                  <h3 className="text-lg font-semibold">{product.name}</h3>
-                  <p className="text-gray-500">PKR {product.oldPrice}</p>
-                  <p className="text-red-600 font-bold">PKR {product.price * product.quantity}</p>
+                  <h3 className="text-lg font-semibold">{product.productName || product.name}</h3>
+                  <p className="text-gray-500 line-through">PKR {product.oldPrice?.toLocaleString()}</p>
+                  <p className="text-red-600 font-bold">PKR {(product.discountedPrice || product.price) * product.quantity}</p>
 
                   {/* ✅ Quantity Controls */}
                   <div className="flex items-center mt-2">
@@ -43,7 +44,7 @@ const CartPage = ({ cart, removeFromCart, increaseQuantity, decreaseQuantity }) 
             ))}
           </div>
 
-          {/* ✅ Cart Summary with Shipping Fee */}
+          {/* ✅ Cart Summary with FREE Shipping */}
           <div className="p-6 bg-white shadow-md rounded-md">
             <h2 className="text-xl font-bold mb-4">Order Summary</h2>
 
@@ -52,9 +53,9 @@ const CartPage = ({ cart, removeFromCart, increaseQuantity, decreaseQuantity }) 
               <p className="text-lg font-semibold">PKR {totalPrice.toLocaleString()}</p>
             </div>
 
-            <div className="flex justify-between mb-2">
-              <p className="text-lg">Shipping Fee:</p>
-              <p className="text-lg font-semibold">PKR {shippingFee.toLocaleString()}</p>
+            <div className="flex justify-between mb-2 text-green-600 font-bold">
+              <p className="text-lg">Shipping:</p>
+              <p className="text-lg">FREE</p>
             </div>
 
             <hr className="my-2" />
@@ -65,8 +66,8 @@ const CartPage = ({ cart, removeFromCart, increaseQuantity, decreaseQuantity }) 
             </div>
 
             <Link to="/checkout" className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 flex items-center justify-center">
-  Proceed to Checkout
-</Link>
+              Proceed to Checkout
+            </Link>
 
             <Link to="/shop" className="block text-center text-red-500 mt-4 hover:underline">
               Continue Shopping

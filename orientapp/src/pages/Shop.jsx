@@ -13,7 +13,7 @@ const Shop = ({ addToCart }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortOrder, setSortOrder] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 12; // ✅ Show only 12 products per page
+  const productsPerPage = 12;
 
   // ✅ Fetch Products from Firebase
   useEffect(() => {
@@ -39,29 +39,26 @@ const Shop = ({ addToCart }) => {
   useEffect(() => {
     let updatedProducts = [...products];
 
-    // 🔍 Search Filtering
     if (searchQuery) {
       updatedProducts = updatedProducts.filter((product) =>
-        product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        product.productName && product.productName.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // 📂 Category Filtering
     if (selectedCategory !== "all") {
       updatedProducts = updatedProducts.filter(
         (product) => product.category === selectedCategory
       );
     }
 
-    // 🔼🔽 Sorting by Price
     if (sortOrder === "lowToHigh") {
-      updatedProducts.sort((a, b) => a.price - b.price);
+      updatedProducts.sort((a, b) => a.discountedPrice - b.discountedPrice);
     } else if (sortOrder === "highToLow") {
-      updatedProducts.sort((a, b) => b.price - a.price);
+      updatedProducts.sort((a, b) => b.discountedPrice - a.discountedPrice);
     }
 
     setFilteredProducts(updatedProducts);
-    setCurrentPage(1); // ✅ Reset pagination when filters change
+    setCurrentPage(1);
   }, [searchQuery, selectedCategory, sortOrder, products]);
 
   // ✅ Get Unique Categories
@@ -73,7 +70,6 @@ const Shop = ({ addToCart }) => {
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  // ✅ Handle Pagination Click
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
@@ -156,23 +152,23 @@ const Shop = ({ addToCart }) => {
                 <div key={product.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative flex flex-col p-4">
                   {product.discount && (
                     <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-md font-semibold">
-                      {product.discount} OFF
+                      {product.discount} % OFF
                     </div>
                   )}
 
                   <Link to={`/product/${product.id}`} className="flex-grow">
                     <img
-                      src={product.image}
-                      alt={product.name}
+                      src={product.productImage || "/images/default-product.jpg"} // ✅ Fix: Show uploaded image
+                      alt={product.productName}
                       className="w-full h-[200px] object-contain"
                       loading="lazy"
                     />
                   </Link>
 
                   <div className="pt-4 pb-6 text-center flex flex-col justify-between flex-grow">
-                    <h3 className="font-medium text-lg min-h-[3rem]">{product.name}</h3>
+                    <h3 className="font-medium text-lg min-h-[3rem]">{product.productName}</h3>
                     <p className="text-gray-500 line-through text-sm">PKR {product.oldPrice}</p>
-                    <p className="text-red-600 text-xl font-bold">PKR {product.price}</p>
+                    <p className="text-red-600 text-xl font-bold">PKR {product.discountedPrice}</p>
 
                     {/* ✅ Add to Cart Button */}
                     <button
@@ -187,13 +183,6 @@ const Shop = ({ addToCart }) => {
             ) : (
               <p className="text-center text-gray-500 w-full">No products found.</p>
             )}
-          </div>
-
-          {/* ✅ Pagination Buttons */}
-          <div className="flex justify-center mt-6 space-x-4">
-            <button onClick={prevPage} disabled={currentPage === 1} className="p-2 bg-gray-300 rounded">Previous</button>
-            <span>Page {currentPage} of {totalPages}</span>
-            <button onClick={nextPage} disabled={currentPage === totalPages} className="p-2 bg-gray-300 rounded">Next</button>
           </div>
         </div>
       </div>

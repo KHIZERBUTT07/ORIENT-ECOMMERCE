@@ -1,28 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "../firebaseConfig"; // ✅ Firebase Config
 import { collection, addDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom"; // ✅ Import for Redirection
+import { useNavigate, useLocation } from "react-router-dom"; // ✅ Import for Navigation & Location
 
 const Checkout = ({ cartItems, clearCart }) => {
-  const navigate = useNavigate(); // ✅ Hook for navigation
+  const navigate = useNavigate();
+  const location = useLocation();
   const [userInfo, setUserInfo] = useState({
     name: "",
     phone: "",
     address: "",
     city: "",
     paymentMethod: "COD",
-    note: "", // ✅ Add note field
+    note: "",
   });
 
-  const [loading, setLoading] = useState(false); // ✅ Manage Loading State
+  const [checkoutItems, setCheckoutItems] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // ✅ Shipping Charges
-  const shippingCharge = 200; // Set flat rate shipping charge
+  // ✅ Free Shipping Applied
+  const shippingCharge = 0; // ✅ Free shipping
 
-  // ✅ Calculate Total Price (Including Shipping)
-  const subtotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  const totalPrice = subtotal + shippingCharge; // ✅ Add shipping charge
+  // ✅ Calculate Total Price
+  useEffect(() => {
+    if (location.state?.product) {
+      setCheckoutItems([{ ...location.state.product, quantity: 1 }]); // ✅ Direct Buy Now
+    } else if (cartItems.length > 0) {
+      setCheckoutItems(cartItems); // ✅ Cart Checkout
+    }
+  }, [location.state, cartItems]);
+
+  // ✅ Calculate Subtotal Using **Discounted Price**
+  const subtotal = checkoutItems.reduce((total, item) => total + (item.discountedPrice || item.price) * item.quantity, 0);
+  const totalPrice = subtotal + shippingCharge;
 
   // ✅ Handle Input Change
   const handleChange = (e) => {
@@ -37,25 +48,27 @@ const Checkout = ({ cartItems, clearCart }) => {
       return;
     }
 
-    setLoading(true); // ✅ Show Loading inside the button
+    setLoading(true);
 
     const orderData = {
       user: userInfo,
-      items: cartItems,
+      items: checkoutItems,
       subtotal,
       shippingCharge,
       total: totalPrice,
       status: "Pending",
       timestamp: new Date(),
-      note: userInfo.note, // ✅ Include note in order data
+      note: userInfo.note,
     };
 
     try {
       await addDoc(collection(db, "orders"), orderData);
       toast.success("✅ Order placed successfully!");
 
-      // ✅ Clear cart after order placement
-      clearCart();
+      // ✅ Clear cart if the purchase was from the cart
+      if (!location.state || !location.state.product) {
+        clearCart();
+      }
 
       // ✅ Redirect to Home after 2 seconds
       setTimeout(() => {
@@ -65,7 +78,7 @@ const Checkout = ({ cartItems, clearCart }) => {
     } catch (error) {
       console.error("Error placing order:", error);
       toast.error("❌ Failed to place order. Please try again!");
-      setLoading(false); // ✅ Hide Loading on Error
+      setLoading(false);
     }
   };
 
@@ -76,34 +89,34 @@ const Checkout = ({ cartItems, clearCart }) => {
       {/* ✅ Order Summary */}
       <div className="bg-gray-100 p-6 rounded-lg mt-6">
         <h3 className="text-xl font-bold mb-4">Order Summary</h3>
-        {cartItems.map((item, index) => (
+        {checkoutItems.map((item, index) => (
           <div key={index} className="flex justify-between border-b pb-2 mb-2">
-            <p>{item.name} (x{item.quantity})</p>
-            <p>PKR {item.price * item.quantity}</p>
+            <p>{item.productName} (x{item.quantity})</p>
+            <p>PKR {((item.discountedPrice || item.price) * item.quantity).toLocaleString()}</p>
           </div>
         ))}
         <div className="flex justify-between mt-4 font-bold">
           <p>Subtotal:</p>
-          <p>PKR {subtotal}</p>
+          <p>PKR {subtotal.toLocaleString()}</p>
         </div>
-        <div className="flex justify-between text-red-600 font-bold">
+        <div className="flex justify-between text-green-600 font-bold">
           <p>Shipping:</p>
-          <p>PKR {shippingCharge}</p>
+          <p>FREE</p>
         </div>
         <div className="flex justify-between text-xl font-bold text-red-600 mt-4">
           <p>Total:</p>
-          <p>PKR {totalPrice}</p>
+          <p>PKR {totalPrice.toLocaleString()}</p>
         </div>
       </div>
 
       {/* ✅ User Info Form */}
       <div className="bg-white p-6 rounded-lg shadow-md mt-6">
         <h3 className="text-xl font-bold mb-4">Billing Details</h3>
-        <input type="text" name="name" placeholder="Full Name" value={userInfo.name} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-        <input type="text" name="phone" placeholder="Phone Number" value={userInfo.phone} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-        <input type="text" name="address" placeholder="Address" value={userInfo.address} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-        <input type="text" name="city" placeholder="City" value={userInfo.city} onChange={handleChange} className="w-full border p-2 rounded mb-2" />
-        
+        <input type="text" name="name" placeholder="Full Name" value={userInfo.name} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+        <input type="text" name="phone" placeholder="Phone Number" value={userInfo.phone} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+        <input type="text" name="address" placeholder="Address" value={userInfo.address} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+        <input type="text" name="city" placeholder="City" value={userInfo.city} onChange={handleChange} className="w-full border p-2 rounded mb-2" required />
+
         {/* ✅ Note Section */}
         <div className="mt-4">
           <label className="font-bold">Additional Notes (Optional)</label>
@@ -128,13 +141,13 @@ const Checkout = ({ cartItems, clearCart }) => {
         {/* ✅ Place Order Button */}
         <button
           onClick={placeOrder}
-          disabled={loading} // Disable the button while loading
+          disabled={loading}
           className="w-full bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 mt-4 flex justify-center items-center"
         >
           {loading ? (
-            <img src="/images/LoadingGif.gif" alt="Loading..." className="w-6 h-6" /> // Show loading GIF inside the button
+            <img src="/images/LoadingGif.gif" alt="Loading..." className="w-6 h-6" />
           ) : (
-            "Place Order" // Show "Place Order" text when not loading
+            "Place Order"
           )}
         </button>
       </div>
