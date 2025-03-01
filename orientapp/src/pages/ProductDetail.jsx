@@ -12,6 +12,15 @@ const ProductDetail = ({ addToCart }) => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
+  // Helper function to extract YouTube video ID
+  const extractYouTubeVideoId = (url) => {
+    const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11}))/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -83,7 +92,10 @@ const ProductDetail = ({ addToCart }) => {
             <p className="text-lg text-gray-600 mt-4">{product.description}</p>
             <p className="text-red-600 text-2xl font-bold mt-4">PKR {product.discountedPrice?.toLocaleString()}</p>
             <p className="text-gray-500 line-through">Old Price: PKR {product.oldPrice?.toLocaleString()}</p>
-            <p className="mt-4 text-green-600 font-semibold">✅ In Stock: {product.stock}</p>
+            <p className="mt-4 text-green-600 font-semibold">
+              ✅ {product.stock > 0 ? "In Stock" : "Out of Stock"}
+            </p>
+
             <p className="text-gray-500">
               📦 Category: {product.category ? product.category.charAt(0).toUpperCase() + product.category.slice(1) : "N/A"}
             </p>
@@ -153,7 +165,7 @@ const ProductDetail = ({ addToCart }) => {
           <h2 className="text-2xl font-bold mb-4 text-red-600">🎥 Product Video</h2>
           <div className="aspect-w-16 aspect-h-9">
             <iframe
-              src={`https://www.youtube.com/embed/${product.youtubeVideoURL.split("v=")[1]}`}
+              src={`https://www.youtube.com/embed/${extractYouTubeVideoId(product.youtubeVideoURL)}`}
               title="YouTube Video Player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen

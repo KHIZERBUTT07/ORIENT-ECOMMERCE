@@ -169,7 +169,7 @@ const App = () => {
         <Route path="/admin/orders" element={<ProtectedRoute element={<AdminOrders />} />} />
         <Route path="/admin/memberships" element={<ProtectedRoute element={<AdminMembership />} />} />
         <Route path="/admin/active-products" element={<AdminActiveProducts />} />
-        <Route path="/admin/edit-product/:id" element={<EditProduct />} />
+        <Route path="/admin/edit-product/:productId" element={<EditProduct />} />
 
 
 

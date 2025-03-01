@@ -37,7 +37,7 @@ boosting skus for showing products on fron top selling products
 with csv file
 
 categories management page in admin 
-
+when hover on navbar product it should show prod categoried and subcategories
 compaign  page in admin
 
 product detail page new

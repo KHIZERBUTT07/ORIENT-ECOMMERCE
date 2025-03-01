@@ -58,6 +58,11 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
     location.pathname === "/shop" ||
     location.pathname === "/membership";
 
+  // ✅ Function to check if a link is active
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
   return (
     <nav className="bg-white shadow-md py-4 relative z-50">
       <div className="container mx-auto flex justify-between items-center px-6">
@@ -70,17 +75,57 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
         <div className="hidden lg:flex space-x-6">
           {isAdminAuthenticated && isAdminPage ? (
             <>
-              <Link to="/admin" className="hover:text-red-600">Dashboard</Link>
-              <Link to="/admin/orders" className="hover:text-red-600">Orders</Link>
-              <Link to="/admin/memberships" className="hover:text-red-600">Dealerships</Link>
+              <Link
+                to="/admin"
+                className={`hover:text-red-600 ${isActive("/admin") ? "text-red-600" : "text-gray-700"}`}
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/admin/orders"
+                className={`hover:text-red-600 ${isActive("/admin/orders") ? "text-red-600" : "text-gray-700"}`}
+              >
+                Orders
+              </Link>
+              <Link
+                to="/admin/memberships"
+                className={`hover:text-red-600 ${isActive("/admin/memberships") ? "text-red-600" : "text-gray-700"}`}
+              >
+                Dealerships
+              </Link>
             </>
           ) : (
             <>
-              <Link to="/" className="hover:text-red-600">Home</Link>
-              <Link to="/shop" className="hover:text-red-600">Products</Link>
-              <Link to="/about" className="hover:text-red-600">Who We Are</Link>
-              <Link to="/contact" className="hover:text-red-600">Contact</Link>
-              <Link to="/membership" className="hover:text-red-600">Get Dealership</Link> {/* ✅ Membership Link */}
+              <Link
+                to="/"
+                className={`hover:text-red-600 ${isActive("/") ? "text-red-600" : "text-gray-700"}`}
+              >
+                Home
+              </Link>
+              <Link
+                to="/shop"
+                className={`hover:text-red-600 ${isActive("/shop") ? "text-red-600" : "text-gray-700"}`}
+              >
+                Products
+              </Link>
+              <Link
+                to="/about"
+                className={`hover:text-red-600 ${isActive("/about") ? "text-red-600" : "text-gray-700"}`}
+              >
+                Who We Are
+              </Link>
+              <Link
+                to="/contact"
+                className={`hover:text-red-600 ${isActive("/contact") ? "text-red-600" : "text-gray-700"}`}
+              >
+                Contact
+              </Link>
+              <Link
+                to="/membership"
+                className={`hover:text-red-600 ${isActive("/membership") ? "text-red-600" : "text-gray-700"}`}
+              >
+                Get Dealership
+              </Link>
             </>
           )}
         </div>
@@ -156,17 +201,65 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
         <div className="absolute top-16 left-0 w-full bg-white shadow-md flex flex-col items-center py-4 lg:hidden">
           {isAdminAuthenticated && isAdminPage ? (
             <>
-              <Link to="/admin" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Dashboard</Link>
-              <Link to="/admin/orders" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Orders</Link>
-              <Link to="/admin/memberships" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Dealerships</Link>
+              <Link
+                to="/admin"
+                className={`py-2 text-lg ${isActive("/admin") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/admin/orders"
+                className={`py-2 text-lg ${isActive("/admin/orders") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Orders
+              </Link>
+              <Link
+                to="/admin/memberships"
+                className={`py-2 text-lg ${isActive("/admin/memberships") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Dealerships
+              </Link>
             </>
           ) : (
             <>
-              <Link to="/" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Home</Link>
-              <Link to="/shop" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Products</Link>
-              <Link to="/about" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Who We Are</Link>
-              <Link to="/contact" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Contact</Link>
-              <Link to="/membership" className="py-2 text-lg text-gray-700 hover:text-red-600" onClick={() => setMenuOpen(false)}>Get Dealership</Link>
+              <Link
+                to="/"
+                className={`py-2 text-lg ${isActive("/") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                to="/shop"
+                className={`py-2 text-lg ${isActive("/shop") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Products
+              </Link>
+              <Link
+                to="/about"
+                className={`py-2 text-lg ${isActive("/about") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Who We Are
+              </Link>
+              <Link
+                to="/contact"
+                className={`py-2 text-lg ${isActive("/contact") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              <Link
+                to="/membership"
+                className={`py-2 text-lg ${isActive("/membership") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Get Dealership
+              </Link>
             </>
           )}
 
@@ -192,4 +285,3 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
 };
 
 export default Navbar;
-

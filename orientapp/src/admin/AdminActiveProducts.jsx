@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { db } from "../firebaseConfig";
 import { collection, getDocs, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { toast } from "react-toastify";
-// import { Navigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const AdminActiveProducts = () => {
@@ -10,7 +9,6 @@ const AdminActiveProducts = () => {
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-
 
     // ✅ Filters
     const [searchKeyword, setSearchKeyword] = useState("");
@@ -20,6 +18,7 @@ const AdminActiveProducts = () => {
     const [minDiscount, setMinDiscount] = useState("");
     const [maxDiscount, setMaxDiscount] = useState("");
 
+    // ✅ Fetch Products
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -100,9 +99,10 @@ const AdminActiveProducts = () => {
         }
     };
 
-    // ✅ Placeholder for Edit Button
-    const editProduct = (id) => {
-        toast.info(`🛠 Edit function not implemented yet for product ID: ${id}`);
+    // ✅ Navigate to Edit Product Page
+    const handleEditProduct = (id) => {
+        console.log("Editing product with ID:", id); // Debugging
+        navigate(`/admin/edit-product/${id}`); // Ensure ID is passed correctly
     };
 
     return (
@@ -191,7 +191,7 @@ const AdminActiveProducts = () => {
                                 <td className="p-3">{product.category}</td>
                                 <td className="p-3 flex flex-col sm:flex-row gap-2">
                                     <button
-                                        onClick={() => navigate(`/admin/edit-product/${product.id}`)} // ✅ Use inside onClick
+                                        onClick={() => handleEditProduct(product.id)} // ✅ Use handleEditProduct
                                         className="bg-blue-500 text-white px-2 py-1 rounded"
                                     >
                                         Edit
