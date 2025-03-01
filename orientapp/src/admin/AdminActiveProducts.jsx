@@ -45,16 +45,16 @@ const AdminActiveProducts = () => {
 
         if (searchKeyword) {
             updatedProducts = updatedProducts.filter((product) =>
-                product.name.toLowerCase().includes(searchKeyword.toLowerCase())
+                product.productName.toLowerCase().includes(searchKeyword.toLowerCase()) // ✅ Use productName
             );
         }
 
         if (minPrice) {
-            updatedProducts = updatedProducts.filter((product) => product.price >= parseFloat(minPrice));
+            updatedProducts = updatedProducts.filter((product) => product.oldPrice >= parseFloat(minPrice)); // ✅ Use oldPrice
         }
 
         if (maxPrice) {
-            updatedProducts = updatedProducts.filter((product) => product.price <= parseFloat(maxPrice));
+            updatedProducts = updatedProducts.filter((product) => product.oldPrice <= parseFloat(maxPrice)); // ✅ Use oldPrice
         }
 
         if (category !== "all") {
@@ -179,13 +179,17 @@ const AdminActiveProducts = () => {
                         {filteredProducts.map((product) => (
                             <tr key={product.id} className="border text-center">
                                 <td className="p-3">
-                                    <img src={product.image} alt={product.name} className="w-16 h-16 object-contain mx-auto" />
+                                    <img
+                                        src={product.productImage} // ✅ Use productImage
+                                        alt={product.productName} // ✅ Use productName
+                                        className="w-16 h-16 object-contain mx-auto"
+                                    />
                                 </td>
-                                <td className="p-3">{product.name}</td>
-                                <td className="p-3">PKR {product.price}</td>
+                                <td className="p-3">{product.productName}</td> {/* ✅ Use productName */}
+                                <td className="p-3">PKR {product.oldPrice}</td> {/* ✅ Use oldPrice */}
                                 <td className="p-3">{product.discount}%</td>
                                 <td className="p-3">
-                                    PKR {(product.price - (product.price * product.discount) / 100).toFixed(2)}
+                                    PKR {(product.oldPrice - (product.oldPrice * product.discount) / 100).toFixed(2)} {/* ✅ Use oldPrice */}
                                 </td>
                                 <td className="p-3">{product.stock} pcs</td>
                                 <td className="p-3">{product.category}</td>

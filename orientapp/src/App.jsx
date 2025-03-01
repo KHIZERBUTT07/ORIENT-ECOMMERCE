@@ -47,29 +47,35 @@ const App = () => {
   // ✅ Function to add item to cart
   const addToCart = (product) => {
     const existingProduct = cart.find((item) => item.id === product.id);
-  
+
     let updatedCart;
     if (existingProduct) {
       updatedCart = cart.map((item) =>
         item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
       );
     } else {
-      updatedCart = [...cart, { ...product, quantity: 1 }];
+      updatedCart = [
+        ...cart,
+        {
+          ...product,
+          quantity: 1,
+          discountedPrice: product.oldPrice - (product.oldPrice * product.discount) / 100, // ✅ Calculate discounted price
+        },
+      ];
     }
-  
+
     setCart(updatedCart);
     setCartCount(updatedCart.reduce((total, item) => total + item.quantity, 0));
     setIsCartOpen(true);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
-  
-    // ✅ Ensure toast notification only appears once
+
+    // ✅ Show toast message with product name
     if (!existingProduct) {
-      toast.success(`${product.name} has been added to your cart!`);
+      toast.success(`${product.productName} added to cart!`);
     } else {
-      toast.info(`${product.name} quantity increased!`);
+      toast.info(`${product.productName} quantity increased!`);
     }
   };
-    
 
   // ✅ Function to remove item from cart
   const removeFromCart = (productId) => {
@@ -160,7 +166,7 @@ const App = () => {
         {/* ✅ Membership Page */}
         <Route path="/membership" element={<Membership />} />
 
-         {/* ✅ Dealers Page */}
+        {/* ✅ Dealers Page */}
         <Route path="/dealer-dashboard" element={<DealerDashboard />} />
 
         {/* ✅ Admin Routes (Protected) */}
@@ -170,8 +176,6 @@ const App = () => {
         <Route path="/admin/memberships" element={<ProtectedRoute element={<AdminMembership />} />} />
         <Route path="/admin/active-products" element={<AdminActiveProducts />} />
         <Route path="/admin/edit-product/:productId" element={<EditProduct />} />
-
-
 
         {/* ✅ Category Routes */}
         <Route path="/shop/category/:category" element={<ShopCategoryPage products={products} addToCart={addToCart} />} />

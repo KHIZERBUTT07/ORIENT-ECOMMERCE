@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FaTimes, FaTrash, FaPlus, FaMinus } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const SidebarCart = ({ isCartOpen, setIsCartOpen, cart, removeFromCart, increaseQuantity, decreaseQuantity }) => {
   return (
@@ -18,11 +19,17 @@ const SidebarCart = ({ isCartOpen, setIsCartOpen, cart, removeFromCart, increase
         ) : (
           cart.map((product) => (
             <div key={product.id} className="flex justify-between items-center border p-3 rounded-md shadow-sm">
-              <img src={product.image} alt={product.name} className="w-16 h-16 object-contain" />
+              <img
+                src={product.productImage} // ✅ Use productImage
+                alt={product.productName} // ✅ Use productName
+                className="w-16 h-16 object-contain"
+              />
               <div className="flex-1 ml-4">
-                <h3 className="text-sm font-semibold">{product.name}</h3>
-                <p className="text-red-600 font-bold">PKR {product.price * product.quantity}</p>
-                
+                <h3 className="text-sm font-semibold">{product.productName}</h3> {/* ✅ Use productName */}
+                <p className="text-red-600 font-bold">
+                  PKR {(product.discountedPrice * product.quantity).toFixed(2)} {/* ✅ Use discountedPrice */}
+                </p>
+
                 {/* ✅ Quantity Controls */}
                 <div className="flex items-center mt-2">
                   <button onClick={() => decreaseQuantity(product.id)} className="text-red-600 p-1">
@@ -55,4 +62,4 @@ const SidebarCart = ({ isCartOpen, setIsCartOpen, cart, removeFromCart, increase
   );
 };
 
-export default SidebarCart;
+export default SidebarCart; 

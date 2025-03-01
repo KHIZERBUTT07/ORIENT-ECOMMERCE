@@ -4,6 +4,10 @@ import { db } from "../firebaseConfig"; // ✅ Firebase
 import { collection, getDocs } from "firebase/firestore";
 import { FaShoppingCart } from "react-icons/fa";
 import { MdPayment } from "react-icons/md"; // ✅ Buy Now Icon
+import { Swiper, SwiperSlide } from "swiper/react"; // ✅ Swiper for Carousel
+import "swiper/css"; // ✅ Swiper CSS
+import "swiper/css/navigation"; // ✅ Swiper Navigation CSS
+import { Navigation } from "swiper/modules"; // ✅ Swiper Navigation Module
 
 const ProductDetail = ({ addToCart }) => {
   const { productId } = useParams();
@@ -12,14 +16,12 @@ const ProductDetail = ({ addToCart }) => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
   // Helper function to extract YouTube video ID
   const extractYouTubeVideoId = (url) => {
     const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11}))/;
     const match = url.match(regex);
     return match ? match[1] : null;
   };
-
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -78,12 +80,24 @@ const ProductDetail = ({ addToCart }) => {
 
       {/* ✅ Product Details Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-        {/* Product Image */}
-        <img
-          src={product.productImage || "/images/default-product.jpg"}
-          alt={product.productName}
-          className="w-full h-[400px] object-contain border shadow-lg"
-        />
+        {/* ✅ Product Image Carousel */}
+        <div className="w-full">
+          <Swiper
+            navigation={true} // ✅ Enable navigation buttons
+            modules={[Navigation]} // ✅ Add Navigation module
+            className="mySwiper"
+          >
+            {product.productImages?.map((image, index) => (
+              <SwiperSlide key={index}>
+                <img
+                  src={image || "/images/default-product.jpg"}
+                  alt={`${product.productName} - Image ${index + 1}`}
+                  className="w-full h-[400px] object-contain border shadow-lg"
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
 
         {/* Product Info */}
         <div className="flex flex-col justify-between">
