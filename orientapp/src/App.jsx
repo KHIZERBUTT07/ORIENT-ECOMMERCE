@@ -23,6 +23,7 @@ import Membership from "./pages/Membership";
 import DealerDashboard from "./pages/DealerDashboard";
 import AdminActiveProducts from "./admin/AdminActiveProducts";
 import EditProduct from "./admin/EditProduct";
+import AdminDeals from "./admin/AdminDeals";
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -174,6 +175,7 @@ const App = () => {
         <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} />} />
         <Route path="/admin/orders" element={<ProtectedRoute element={<AdminOrders />} />} />
         <Route path="/admin/memberships" element={<ProtectedRoute element={<AdminMembership />} />} />
+        <Route path="/admin/deals" element={<ProtectedRoute element={<AdminDeals />} />} />
         <Route path="/admin/active-products" element={<AdminActiveProducts />} />
         <Route path="/admin/edit-product/:productId" element={<EditProduct />} />
 

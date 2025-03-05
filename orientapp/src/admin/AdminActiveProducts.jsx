@@ -179,29 +179,44 @@ const AdminActiveProducts = () => {
                         {filteredProducts.map((product) => (
                             <tr key={product.id} className="border text-center">
                                 <td className="p-3">
-                                    <img
-                                        src={product.productImage} // ✅ Use productImage
-                                        alt={product.productName} // ✅ Use productName
-                                        className="w-16 h-16 object-contain mx-auto"
-                                    />
+                                    {/* ✅ Display the first image from productImages array */}
+                                    {product.productImages && product.productImages.length > 0 ? (
+                                        <img
+                                            src={product.productImages[0]} // Use the first image
+                                            alt={product.productName}
+                                            className="w-16 h-16 object-contain mx-auto"
+                                        />
+                                    ) : (
+                                        <span>No Image</span> // Fallback if no images are available
+                                    )}
                                 </td>
-                                <td className="p-3">{product.productName}</td> {/* ✅ Use productName */}
-                                <td className="p-3">PKR {product.oldPrice}</td> {/* ✅ Use oldPrice */}
+                                <td className="p-3">{product.productName}</td>
+                                <td className="p-3">PKR {product.oldPrice}</td>
                                 <td className="p-3">{product.discount}%</td>
                                 <td className="p-3">
-                                    PKR {(product.oldPrice - (product.oldPrice * product.discount) / 100).toFixed(2)} {/* ✅ Use oldPrice */}
+                                    PKR {(product.oldPrice - (product.oldPrice * product.discount) / 100).toFixed(2)}
                                 </td>
                                 <td className="p-3">{product.stock} pcs</td>
                                 <td className="p-3">{product.category}</td>
                                 <td className="p-3 flex flex-col sm:flex-row gap-2">
                                     <button
-                                        onClick={() => handleEditProduct(product.id)} // ✅ Use handleEditProduct
+                                        onClick={() => handleEditProduct(product.id)}
                                         className="bg-blue-500 text-white px-2 py-1 rounded"
                                     >
                                         Edit
                                     </button>
-                                    <button onClick={() => deactivateProduct(product.id)} className="bg-yellow-500 text-white px-2 py-1 rounded">Deactivate</button>
-                                    <button onClick={() => deleteProduct(product.id)} className="bg-red-600 text-white px-2 py-1 rounded">Delete</button>
+                                    <button
+                                        onClick={() => deactivateProduct(product.id)}
+                                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+                                    >
+                                        Deactivate
+                                    </button>
+                                    <button
+                                        onClick={() => deleteProduct(product.id)}
+                                        className="bg-red-600 text-white px-2 py-1 rounded"
+                                    >
+                                        Delete
+                                    </button>
                                 </td>
                             </tr>
                         ))}

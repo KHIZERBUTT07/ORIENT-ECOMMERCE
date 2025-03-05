@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { db } from "../firebaseConfig";
+import { db, storage } from "../firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { toast } from "react-toastify";
 
 const EditProduct = () => {
@@ -24,9 +25,12 @@ const EditProduct = () => {
     warranty: "",
     youtubeURL: "",
     stock: "",
+    productImages: [], // ✅ Store multiple images
   });
 
-  const [loading, setLoading] = useState(true); // Initialize as true for initial fetch
+  const [loading, setLoading] = useState(true);
+  const [newImages, setNewImages] = useState([]); // ✅ Store new images to be added
+  const [removedImages, setRemovedImages] = useState([]); // ✅ Track removed images
 
   // ✅ Fetch Existing Product Data and Pre-Fill Form
   useEffect(() => {
@@ -48,6 +52,7 @@ const EditProduct = () => {
             metaKeywords: productData.metaKeywords ? productData.metaKeywords.join(", ") : "",
             features: productData.features ? productData.features.join("\n") : "",
             specs: productData.specs ? JSON.stringify(productData.specs, null, 2) : "",
+            productImages: productData.productImages || [], // ✅ Load existing images
           });
         } else {
           toast.error("Product not found");
@@ -57,7 +62,7 @@ const EditProduct = () => {
         console.error("Error fetching product:", error);
         toast.error("Failed to fetch product details");
       } finally {
-        setLoading(false); // Set loading to false after fetching
+        setLoading(false);
       }
     };
 
@@ -68,7 +73,6 @@ const EditProduct = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Automatically calculate discounted price based on discount percentage
     if (name === "discount") {
       const discount = value;
       const discountedPrice =
@@ -81,17 +85,63 @@ const EditProduct = () => {
     }
   };
 
+  // ✅ Handle Image Selection (For Adding New Images)
+ 
+const handleImageChange = (e) => {
+  const files = Array.from(e.target.files);
+
+  // Create preview URLs for the new images
+  const previewImages = files.map((file) => URL.createObjectURL(file));
+
+  // Update the state to include both existing and new preview images
+  setNewImages(files); // Store the actual files for later upload
+  setFormData((prevFormData) => ({
+    ...prevFormData,
+    productImages: [...prevFormData.productImages, ...previewImages], // Add preview URLs
+  }));
+};
+  // ✅ Handle Removing Existing Images
+  const handleRemoveImage = (index) => {
+    const updatedImages = [...formData.productImages];
+    const removedImage = updatedImages.splice(index, 1);
+    setRemovedImages([...removedImages, removedImage[0]]); // Store removed image URL
+    setFormData({ ...formData, productImages: updatedImages });
+  };
+
+  // ✅ Upload New Images to Firebase Storage
+  const uploadImages = async (images) => {
+    const uploadedImageUrls = [];
+
+    for (const image of images) {
+      const storageRef = ref(storage, `productImages/${image.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, image);
+
+      await new Promise((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          null,
+          (error) => reject(error),
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            uploadedImageUrls.push(downloadURL);
+            resolve();
+          }
+        );
+      });
+    }
+
+    return uploadedImageUrls;
+  };
+
   // ✅ Handle Product Update
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (!formData.productName || !formData.category || !formData.oldPrice || !formData.stock) {
       toast.error("Please fill in all required fields");
       return;
     }
 
-    // Validate JSON for specs
     let parsedSpecs = {};
     try {
       parsedSpecs = JSON.parse(formData.specs || "{}");
@@ -103,6 +153,13 @@ const EditProduct = () => {
     try {
       setLoading(true);
       const productRef = doc(db, "products", productId);
+
+      // ✅ Upload new images if any
+      let updatedImages = [...formData.productImages];
+      if (newImages.length > 0) {
+        const newImageUrls = await uploadImages(newImages);
+        updatedImages = [...updatedImages, ...newImageUrls]; // Append new images
+      }
 
       await updateDoc(productRef, {
         productName: formData.productName,
@@ -120,15 +177,12 @@ const EditProduct = () => {
         warranty: formData.warranty,
         youtubeURL: formData.youtubeURL,
         stock: parseInt(formData.stock),
+        productImages: updatedImages, // ✅ Update images
         timestamp: new Date(),
       });
 
       toast.success("✅ Product updated successfully!");
-
-      // ✅ Navigate back to Admin Active Products Page after update
-      setTimeout(() => {
-        navigate("/admin/active-products");
-      }, 1000);
+      navigate("/admin/active-products");
     } catch (error) {
       console.error("Error updating product:", error);
       toast.error("❌ Failed to update product!");
@@ -137,7 +191,6 @@ const EditProduct = () => {
     }
   };
 
-  // Show loading state while fetching product data
   if (loading) {
     return <div className="text-center py-10">Loading product details...</div>;
   }
@@ -281,6 +334,38 @@ const EditProduct = () => {
           />
         </div>
 
+        <div>
+  <h3 className="text-xl font-bold mb-2">Product Images</h3>
+
+  {/* ✅ Display Existing and New Preview Images */}
+  <div className="flex flex-wrap gap-2">
+    {formData.productImages.map((image, index) => (
+      <div key={index} className="relative">
+        <img
+          src={image}
+          alt={`Product ${index + 1}`}
+          className="w-20 h-20 object-cover rounded border"
+        />
+        <button
+          type="button"
+          className="absolute top-0 right-0 bg-red-600 text-white text-xs px-2 py-1 rounded"
+          onClick={() => handleRemoveImage(index)}
+        >
+          ❌
+        </button>
+      </div>
+    ))}
+  </div>
+
+  <label className="block font-bold mt-2">Add More Images</label>
+  <input
+    type="file"
+    multiple
+    accept="image/*"
+    onChange={handleImageChange}
+    className="w-full border p-2 rounded"
+  />
+</div>;
         {/* ✅ Form Buttons */}
         <div className="flex gap-4">
           <button

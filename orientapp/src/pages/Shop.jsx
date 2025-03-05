@@ -147,29 +147,35 @@ const Shop = ({ addToCart }) => {
 
           {/* ✅ Product Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-            {currentProducts.length > 0 ? (
-              currentProducts.map((product) => (
-                <div key={product.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative flex flex-col p-4">
-                  {product.discount && (
-                    <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-md font-semibold">
-                      {product.discount} % OFF
-                    </div>
-                  )}
+  {currentProducts.length > 0 ? (
+    currentProducts.map((product) => (
+      <div
+        key={product.id}
+        className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative flex flex-col p-4"
+      >
+        {product.discount && (
+          <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-md font-semibold">
+            {product.discount} % OFF
+          </div>
+        )}
 
-                  <Link to={`/product/${product.id}`} className="flex-grow">
-                    <img
-                      src={product.productImage || "/images/default-product.jpg"} // ✅ Fix: Show uploaded image
-                      alt={product.productName}
-                      className="w-full h-[200px] object-contain"
-                      loading="lazy"
-                    />
-                  </Link>
+        <Link to={`/product/${product.id}`} className="flex-grow">
+          <img
+            src={
+              product.productImages && product.productImages.length > 0
+                ? product.productImages[0] // ✅ Show First Image from Array
+                : "/images/default-product.jpg"
+            }
+            alt={product.productName}
+            className="w-full h-[200px] object-contain"
+            loading="lazy"  
+          />
+        </Link>
 
-                  <div className="pt-4 pb-6 text-center flex flex-col justify-between flex-grow">
-                    <h3 className="font-medium text-lg min-h-[3rem]">{product.productName}</h3>
-                    <p className="text-gray-500 line-through text-sm">PKR {product.oldPrice}</p>
-                    <p className="text-red-600 text-xl font-bold">PKR {product.discountedPrice}</p>
-
+        <div className="pt-4 pb-6 text-center flex flex-col justify-between flex-grow">
+          <h3 className="font-medium text-lg min-h-[3rem]">{product.productName}</h3>
+          <p className="text-gray-500 line-through text-sm">PKR {product.oldPrice}</p>
+          <p className="text-red-600 text-xl font-bold">PKR {product.discountedPrice}</p>
                     {/* ✅ Add to Cart Button */}
                     <button
                       onClick={() => addToCart(product)}
