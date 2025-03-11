@@ -20,7 +20,7 @@ const AdminDeals = () => {
     totalPrice: "",
     discount: "",
     finalPrice: "",
-    minOrder: "",
+    minOrder: "", // ✅ Added minOrder field
     dealImages: [], // ✅ Fixed initial state
   });
 
@@ -74,13 +74,15 @@ const AdminDeals = () => {
       );
     });
   };
-  // for removing preview image 
+
+  // ✅ Remove Preview Image
   const handleRemoveImage = (index) => {
     setDealForm((prevForm) => ({
       ...prevForm,
       dealImages: prevForm.dealImages.filter((_, i) => i !== index),
     }));
   };
+
   // ✅ Submit New Product for Dealers
   const handleProductSubmit = async (e) => {
     e.preventDefault();
@@ -151,14 +153,14 @@ const AdminDeals = () => {
     setLoadingDeal(false);
   };
 
-  // Submit New Deal for Dealers
+  // ✅ Submit New Deal for Dealers
   const handleDealSubmit = async (e) => {
     e.preventDefault();
     if (!dealForm.dealName || !dealForm.totalPrice || !dealForm.finalPrice || dealForm.products.length === 0) {
       toast.error("⚠️ Please fill all required fields!");
       return;
     }
-  
+
     try {
       setLoadingDeal(true);
       await addDoc(collection(db, "dealerDeals"), {
@@ -167,11 +169,11 @@ const AdminDeals = () => {
         totalPrice: parseFloat(dealForm.totalPrice),
         discount: parseFloat(dealForm.discount),
         finalPrice: parseFloat(dealForm.finalPrice),
-        minOrder: parseInt(dealForm.minOrder),
+        minOrder: parseInt(dealForm.minOrder), // ✅ Added minOrder
         images: dealForm.dealImages, // ✅ Store images as an array
         timestamp: new Date(),
       });
-  
+
       toast.success("✅ Deal Added Successfully!");
       setDealForm({
         dealName: "",
@@ -179,7 +181,7 @@ const AdminDeals = () => {
         totalPrice: "",
         discount: "",
         finalPrice: "",
-        minOrder: "",
+        minOrder: "", // ✅ Reset minOrder
         dealImages: [],
       });
     } catch (error) {
@@ -205,86 +207,29 @@ const AdminDeals = () => {
         </form>
       </div>
 
-       {/* ✅ Right Section: Add Dealer Deals */}
-<div className="bg-white p-6 rounded-lg shadow-md">
-  <h2 className="text-2xl font-bold text-green-600 text-center">Add Dealer Deals</h2>
-  <form onSubmit={handleDealSubmit} className="mt-4">
-    <input
-      type="text"
-      name="dealName"
-      placeholder="Deal Name"
-      value={dealForm.dealName}
-      onChange={handleDealChange}
-      className="w-full border p-2 rounded mb-2"
-      required
-    />
-    <textarea
-      name="products"
-      placeholder="Products in Deal (Comma Separated)"
-      value={dealForm.products}
-      onChange={handleDealChange}
-      className="w-full border p-2 rounded mb-2"
-      required
-    />
-    <input
-      type="number"
-      name="totalPrice"
-      placeholder="Total Price"
-      value={dealForm.totalPrice}
-      onChange={handleDealChange}
-      className="w-full border p-2 rounded mb-2"
-      required
-    />
-    <input
-      type="number"
-      name="discount"
-      placeholder="Discount (%)"
-      value={dealForm.discount}
-      onChange={handleDealChange}
-      className="w-full border p-2 rounded mb-2"
-      required
-    />
-    <input
-      type="number"
-      name="finalPrice"
-      placeholder="Final Price After Discount"
-      value={dealForm.finalPrice}
-      readOnly
-      className="w-full border p-2 rounded mb-2 bg-gray-200"
-    />
-
-    {/* ✅ Image Upload Section */}
-    <label className="block font-bold mb-1">Upload Deal Images</label>
-    <input
-      type="file"
-      name="dealImages"
-      accept="image/*"
-      multiple
-      onChange={handleImageUpload}
-      className="w-full border p-2 rounded mb-2"
-    />
-
-   {/* ✅ Show Preview of Uploaded Images */}
-<div className="flex gap-2 mt-2 flex-wrap">
-  {dealForm.dealImages &&
-    dealForm.dealImages.map((image, index) => (
-      <div key={index} className="relative">
-        <img
-          src={image}
-          alt={`Deal Image ${index + 1}`}
-          className="w-16 h-16 object-cover border rounded"
-        />
-        {/* ❌ Remove Button */}
-        <button
-          type="button"
-          onClick={() => handleRemoveImage(index)}
-          className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
-        >
-          ✕
-        </button>
-      </div>
-    ))}
-</div>
+      {/* ✅ Right Section: Add Dealer Deals */}
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-green-600 text-center">Add Dealer Deals</h2>
+        <form onSubmit={handleDealSubmit} className="mt-4">
+          <input type="text" name="dealName" placeholder="Deal Name" value={dealForm.dealName} onChange={handleDealChange} className="w-full border p-2 rounded mb-2" required />
+          <textarea name="products" placeholder="Products in Deal (Comma Separated)" value={dealForm.products} onChange={handleDealChange} className="w-full border p-2 rounded mb-2" required />
+          <input type="number" name="totalPrice" placeholder="Total Price" value={dealForm.totalPrice} onChange={handleDealChange} className="w-full border p-2 rounded mb-2" required />
+          <input type="number" name="discount" placeholder="Discount (%)" value={dealForm.discount} onChange={handleDealChange} className="w-full border p-2 rounded mb-2" required />
+          <input type="number" name="finalPrice" placeholder="Final Price After Discount" value={dealForm.finalPrice} readOnly className="w-full border p-2 rounded mb-2 bg-gray-200" />
+          <input type="number" name="minOrder" placeholder="Minimum Order Quantity" value={dealForm.minOrder} onChange={handleDealChange} className="w-full border p-2 rounded mb-2" required /> {/* ✅ Added minOrder field */}
+          <label className="block font-bold mb-1">Upload Deal Images</label>
+          <input type="file" name="dealImages" accept="image/*" multiple onChange={handleImageUpload} className="w-full border p-2 rounded mb-2" />
+          <div className="flex gap-2 mt-2 flex-wrap">
+            {dealForm.dealImages &&
+              dealForm.dealImages.map((image, index) => (
+                <div key={index} className="relative">
+                  <img src={image} alt={`Deal Image ${index + 1}`} className="w-16 h-16 object-cover border rounded" />
+                  <button type="button" onClick={() => handleRemoveImage(index)} className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    ✕
+                  </button>
+                </div>
+              ))}
+          </div>
           <button type="submit" className="w-full bg-green-600 text-white p-3 rounded-lg">{loadingDeal ? "Saving..." : "Add Deal"}</button>
         </form>
       </div>
