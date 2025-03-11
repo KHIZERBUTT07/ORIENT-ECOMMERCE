@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../firebaseConfig"; // ✅ Firebase Config
 import { collection, getDocs } from "firebase/firestore";
-import { Link } from "react-router-dom";
 
 const DealerDashboard = () => {
   const [deals, setDeals] = useState([]);
   const [dealerProducts, setDealerProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0); // ✅ Carousel Index
+  const [imageIndexes, setImageIndexes] = useState({}); // ✅ Image Carousel Index
 
   // ✅ Fetch Dealer Products & Exclusive Deals from Firebase
   useEffect(() => {
@@ -28,6 +27,14 @@ const DealerDashboard = () => {
 
         setDeals(dealList);
         setDealerProducts(productList);
+
+        // ✅ Initialize Image Indexes for Each Deal
+        const initialIndexes = dealList.reduce((acc, deal) => {
+          acc[deal.id] = 0;
+          return acc;
+        }, {});
+        setImageIndexes(initialIndexes);
+
       } catch (error) {
         console.error("Error fetching dealer data:", error);
       } finally {
@@ -36,6 +43,24 @@ const DealerDashboard = () => {
     };
     fetchDealerData();
   }, []);
+
+  // ✅ Automatically Cycle Images Every 3 Seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setImageIndexes((prevIndexes) => {
+        const updatedIndexes = {};
+        deals.forEach((deal) => {
+          if (deal.dealImages && deal.dealImages.length > 0) {
+            updatedIndexes[deal.id] =
+              (prevIndexes[deal.id] + 1) % deal.dealImages.length;
+          }
+        });
+        return updatedIndexes;
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [deals]);
 
   return (
     <div className="container mx-auto py-10 px-6">
@@ -93,59 +118,82 @@ const DealerDashboard = () => {
         )}
       </div>
 
-      {/* ✅ Featured Deals Carousel */}
-      <div className="mt-10 text-center">
-        <h2 className="text-3xl font-bold text-green-600">🎡 Featured Dealer Deals</h2>
-        <p className="text-gray-600 mt-2">Explore our latest bulk deals & exclusive offers.</p>
+{/* ✅ Featured Deals Section (Each Product Has Image Carousel) */}
+<div className="mt-10 text-center">
+  <h2 className="text-3xl font-bold text-green-600">🎡 Featured Dealer Deals</h2>
+  <p className="text-gray-600 mt-2">Explore our latest bulk deals & exclusive offers.</p>
+</div>
 
-        {deals.length > 0 ? (
-          <div className="relative mt-6">
-            <div className="overflow-hidden w-full h-[300px]">
-              <div
-                className="flex transition-transform duration-500"
-                style={{ transform: `translateX(-${currentIndex * 100}%)` }} // ✅ FIXED ERROR HERE
-              >
-                {deals.map((deal, index) => (
-                  <div key={index} className="w-full flex-shrink-0 p-4 bg-white shadow-lg text-center">
-                    <h3 className="text-xl font-bold">{deal.dealName}</h3>
-                    <p className="text-gray-500">
-                      {Array.isArray(deal.products) ? deal.products.join(", ") : "No products listed"}
-                    </p>
-                    <p className="text-gray-500 line-through">Total Price: PKR {deal.totalPrice}</p>
-                    <p className="text-red-600 text-2xl font-bold">Final Price: PKR {deal.finalPrice}</p>
-                    <p className="text-gray-500">Min Order: {deal.minOrder} pcs</p>
+<div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  {loading ? (
+    <p className="text-center text-gray-500 w-full">Loading Deals...</p>
+  ) : deals.length > 0 ? (
+    deals.map((deal) => {
+      // Debugging: Log the deal data to ensure it's correct
+      console.log("Deal Data:", deal);
 
-                    {/* ✅ Fix: Check if images exist before accessing */}
-                    <img
-                      src={deal.dealImages && deal.dealImages.length > 0 ? deal.dealImages[0] : "/images/default-product.jpg"}
-                      alt="Deal Image"
-                      className="w-full h-[200px] object-contain mx-auto mt-4"
-                    />
-                  </div>
+      return (
+        <div key={deal.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative p-4 bg-white">
+          {/* Deal Info */}
+          <h3 className="text-xl font-bold text-center">{deal.dealName}</h3>
+          <p className="text-gray-500 text-center">
+            {Array.isArray(deal.products) ? deal.products.join(", ") : "No products listed"}
+          </p>
+          <p className="text-gray-500 line-through text-center">Total Price: PKR {deal.totalPrice}</p>
+          <p className="text-red-600 text-2xl font-bold text-center">Final Price: PKR {deal.finalPrice}</p>
+          <p className="text-gray-500 text-center">Min Order: {deal.minOrder} pcs</p>
+
+          {/* ✅ Image Carousel for Each Deal */}
+          <div className="relative w-full flex justify-center mt-4">
+            {deal.images && deal.images.length > 0 ? (
+              <div className="w-[250px] h-[200px] overflow-hidden relative">
+                {/* Carousel Images */}
+                {deal.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Deal Image ${index + 1}`}
+                    className={`w-full h-full object-cover rounded-lg shadow-md absolute top-0 left-0 transition-opacity duration-500 ${
+                      index === 0 ? "opacity-100" : "opacity-0"
+                    }`}
+                    style={{
+                      animation: `carousel ${deal.images.length * 3}s infinite ${index * 3}s`,
+                    }}
+                  />
                 ))}
               </div>
-            </div>
-
-            {/* ✅ Carousel Controls */}
-            <div className="flex justify-center mt-4 gap-4">
-              <button
-                onClick={() => setCurrentIndex((prev) => (prev > 0 ? prev - 1 : deals.length - 1))}
-                className="bg-gray-300 px-4 py-2 rounded-full"
-              >
-                ◀ Prev
-              </button>
-              <button
-                onClick={() => setCurrentIndex((prev) => (prev < deals.length - 1 ? prev + 1 : 0))}
-                className="bg-gray-300 px-4 py-2 rounded-full"
-              >
-                Next ▶
-              </button>
-            </div>
+            ) : (
+              // Fallback if no images are available
+              <img
+                src="/images/default-product.jpg"
+                alt="Default Deal Image"
+                className="w-[250px] h-[200px] object-cover rounded-lg shadow-md"
+              />
+            )}
           </div>
-        ) : (
-          <p className="text-center text-gray-500 w-full mt-4">No special offers available at the moment.</p>
-        )}
-      </div>
+        </div>
+      );
+    })
+  ) : (
+    <p className="text-center text-gray-500 w-full">No special offers available at the moment.</p>
+  )}
+</div>
+
+{/* ✅ CSS for Auto Carousel */}
+<style>
+  {`
+    @keyframes carousel {
+      0% { opacity: 1; }
+      33.33% { opacity: 1; }
+      33.34% { opacity: 0; }
+      66.66% { opacity: 0; }
+      66.67% { opacity: 1; }
+      100% { opacity: 1; }
+    }
+  `}
+</style>
+
+      {/* 🚀 Dealer Benefits Section */}
       <div className="mt-10 text-center bg-gray-100 p-6 rounded-lg">
         <h2 className="text-3xl font-bold text-blue-600">🎁 Exclusive Dealer Benefits</h2>
         <p className="text-gray-600 mt-2">Maximize your profits with our dealership offers.</p>
@@ -164,7 +212,7 @@ const DealerDashboard = () => {
             <p className="text-gray-500 mt-2">Get dedicated dealer support and priority assistance.</p>
           </div>
         </div>
-      </div>
+    </div>
     </div>
   );
 };

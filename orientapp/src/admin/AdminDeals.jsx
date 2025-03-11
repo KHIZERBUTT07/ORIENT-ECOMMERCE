@@ -151,14 +151,14 @@ const AdminDeals = () => {
     setLoadingDeal(false);
   };
 
-  // ✅ Submit New Deal for Dealers
+  // Submit New Deal for Dealers
   const handleDealSubmit = async (e) => {
     e.preventDefault();
     if (!dealForm.dealName || !dealForm.totalPrice || !dealForm.finalPrice || dealForm.products.length === 0) {
       toast.error("⚠️ Please fill all required fields!");
       return;
     }
-
+  
     try {
       setLoadingDeal(true);
       await addDoc(collection(db, "dealerDeals"), {
@@ -168,10 +168,10 @@ const AdminDeals = () => {
         discount: parseFloat(dealForm.discount),
         finalPrice: parseFloat(dealForm.finalPrice),
         minOrder: parseInt(dealForm.minOrder),
-        images: dealForm.dealImages, // ✅ Store multiple images
+        images: dealForm.dealImages, // ✅ Store images as an array
         timestamp: new Date(),
       });
-
+  
       toast.success("✅ Deal Added Successfully!");
       setDealForm({
         dealName: "",
