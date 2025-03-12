@@ -19,11 +19,13 @@ const SidebarCart = ({ isCartOpen, setIsCartOpen, cart, removeFromCart, increase
         ) : (
           cart.map((product) => (
             <div key={product.id} className="flex justify-between items-center border p-3 rounded-md shadow-sm">
-              <img
-                src={product.productImage} // ✅ Use productImage
-                alt={product.productName} // ✅ Use productName
-                className="w-16 h-16 object-contain"
-              />
+           <img
+  src={product.image || product.productImage || "/images/default-product.jpg"} // ✅ Fix: Check both image properties
+  alt={product.productName}
+  className="w-16 h-16 object-contain"
+/>
+
+
               <div className="flex-1 ml-4">
                 <h3 className="text-sm font-semibold">{product.productName}</h3> {/* ✅ Use productName */}
                 <p className="text-red-600 font-bold">

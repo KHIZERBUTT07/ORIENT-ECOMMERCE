@@ -24,6 +24,7 @@ import DealerDashboard from "./pages/DealerDashboard";
 import AdminActiveProducts from "./admin/AdminActiveProducts";
 import EditProduct from "./admin/EditProduct";
 import AdminDeals from "./admin/AdminDeals";
+import AdminBoostingPage from "./admin/AdminBoostingPage";
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -48,7 +49,12 @@ const App = () => {
   // ✅ Function to add item to cart
   const addToCart = (product) => {
     const existingProduct = cart.find((item) => item.id === product.id);
-
+  
+    // ✅ Ensure valid price values to prevent NaN errors
+    const oldPrice = product.oldPrice ? parseFloat(product.oldPrice) : 0;
+    const discount = product.discount ? parseFloat(product.discount) : 0;
+    const discountedPrice = oldPrice - (oldPrice * discount) / 100; // ✅ Calculate discounted price
+  
     let updatedCart;
     if (existingProduct) {
       updatedCart = cart.map((item) =>
@@ -60,16 +66,17 @@ const App = () => {
         {
           ...product,
           quantity: 1,
-          discountedPrice: product.oldPrice - (product.oldPrice * product.discount) / 100, // ✅ Calculate discounted price
+          oldPrice,
+          discountedPrice: isNaN(discountedPrice) ? oldPrice : discountedPrice, // ✅ Prevent NaN
         },
       ];
     }
-
+  
     setCart(updatedCart);
     setCartCount(updatedCart.reduce((total, item) => total + item.quantity, 0));
     setIsCartOpen(true);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
-
+  
     // ✅ Show toast message with product name
     if (!existingProduct) {
       toast.success(`${product.productName} added to cart!`);
@@ -77,6 +84,7 @@ const App = () => {
       toast.info(`${product.productName} quantity increased!`);
     }
   };
+  
 
   // ✅ Function to remove item from cart
   const removeFromCart = (productId) => {
@@ -178,6 +186,8 @@ const App = () => {
         <Route path="/admin/deals" element={<ProtectedRoute element={<AdminDeals />} />} />
         <Route path="/admin/active-products" element={<AdminActiveProducts />} />
         <Route path="/admin/edit-product/:productId" element={<EditProduct />} />
+        {/* ✅ Admin Route for Managing Top Selling Products */}
+        <Route path="/admin/boosting" element={<AdminBoostingPage />} />
 
         {/* ✅ Category Routes */}
         <Route path="/shop/category/:category" element={<ShopCategoryPage products={products} addToCart={addToCart} />} />
