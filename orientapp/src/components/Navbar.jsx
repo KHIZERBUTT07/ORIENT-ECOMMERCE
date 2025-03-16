@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
+import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaSignOutAlt, FaChevronRight } from "react-icons/fa";
 import logo from "/images/logo.png";
 import products from "../data/products"; // ✅ Import product data
+import { db } from "../firebaseConfig"; // ✅ Import Firebase
+import { collection, getDocs } from "firebase/firestore"; // ✅ Import Firestore methods
 
 const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
   const location = useLocation();
@@ -10,10 +12,48 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [categories, setCategories] = useState([]); // ✅ Store categories & subcategories
+  const [hoveredCategory, setHoveredCategory] = useState(null); // ✅ Track hovered category
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // ✅ Toggle dropdown
+  const [mobileCategoryOpen, setMobileCategoryOpen] = useState(null); // ✅ Track open mobile category
+  const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(true); // ✅ Always show categories on mobile
 
-  // ✅ Check if Admin is Logged In
-  const isAdminPage = location.pathname.startsWith("/admin");
-  const isAdminAuthenticated = localStorage.getItem("adminAuth") === "true";
+  // ✅ Fetch Categories & Subcategories from Firebase
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "products"));
+        const categoryData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        // Group products by category and subcategory
+        const groupedCategories = {};
+        categoryData.forEach((product) => {
+          const { category, subcategory } = product;
+          if (!groupedCategories[category]) {
+            groupedCategories[category] = new Set();
+          }
+          if (subcategory) {
+            groupedCategories[category].add(subcategory);
+          }
+        });
+
+        // Convert to array format
+        const formattedCategories = Object.keys(groupedCategories).map((category) => ({
+          category,
+          subcategories: Array.from(groupedCategories[category]),
+        }));
+
+        setCategories(formattedCategories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // ✅ Handle Logout
   const handleLogout = () => {
@@ -50,9 +90,23 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
     }
   };
 
-  // ✅ Hide search input on Admin, About, Contact, Shop, and Membership pages (but keep space on large screens)
+  // ✅ Handle Category Click → Redirect to Shop Page with Filter
+  const handleCategoryClick = (category) => {
+    navigate(`/shop?category=${encodeURIComponent(category)}`);
+    setIsDropdownOpen(false); // Close dropdown after click
+    setMenuOpen(false); // Close mobile menu after click
+  };
+
+  // ✅ Handle Subcategory Click → Redirect to Shop Page with Filter
+  const handleSubcategoryClick = (category, subcategory) => {
+    navigate(`/shop?category=${encodeURIComponent(category)}&subcategory=${encodeURIComponent(subcategory)}`);
+    setIsDropdownOpen(false); // Close dropdown after click
+    setMenuOpen(false); // Close mobile menu after click
+  };
+
+  // ✅ Hide search input on Admin, About, Contact, Shop, and Membership pages
   const hideSearchInput =
-    isAdminPage ||
+    location.pathname.startsWith("/admin") ||
     location.pathname === "/about" ||
     location.pathname === "/contact" ||
     location.pathname === "/shop" ||
@@ -60,7 +114,22 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
 
   // ✅ Function to check if a link is active
   const isActive = (path) => {
-    return location.pathname === path;
+    if (path === "/") {
+      // For the "Home" link, check for an exact match
+      return location.pathname === path;
+    } else {
+      // For other links, check if the current path starts with the given path
+      return location.pathname.startsWith(path);
+    }
+  };
+
+  // ✅ Toggle mobile category dropdown
+  const toggleMobileCategory = (category) => {
+    if (mobileCategoryOpen === category) {
+      setMobileCategoryOpen(null); // Close if already open
+    } else {
+      setMobileCategoryOpen(category); // Open the clicked category
+    }
   };
 
   return (
@@ -73,7 +142,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
 
         {/* ✅ Desktop & Tablet Menu (Hidden below 1024px) */}
         <div className="hidden lg:flex space-x-6">
-          {isAdminAuthenticated && isAdminPage ? (
+          {localStorage.getItem("adminAuth") === "true" && location.pathname.startsWith("/admin") ? (
             <>
               <Link
                 to="/admin"
@@ -102,12 +171,68 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
               >
                 Home
               </Link>
-              <Link
-                to="/shop"
-                className={`hover:text-red-600 ${isActive("/shop") ? "text-red-600" : "text-gray-700"}`}
+
+              {/* ✅ Products Dropdown */}
+              <div
+                className="relative hover:text-red-600 text-gray-700 cursor-pointer"
+                onMouseEnter={() => setIsDropdownOpen(true)} // Open dropdown on hover
+                onMouseLeave={() => setIsDropdownOpen(false)} // Close dropdown on leave
               >
-                Products
-              </Link>
+                <Link
+                  to="/shop"
+                  className={`${isActive("/shop") ? "text-red-600" : "text-gray-700"}`}
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  Products
+                </Link>
+
+                {/* ✅ Dropdown for Categories */}
+                {isDropdownOpen && (
+                  <div
+                    className="absolute left-0 top-full bg-white shadow-lg border rounded-lg w-56 z-50"
+                    onMouseEnter={() => setIsDropdownOpen(true)} // Keep dropdown open when hovering over it
+                    onMouseLeave={() => setIsDropdownOpen(false)} // Close dropdown when leaving it
+                  >
+                    {categories.length > 0 ? (
+                      categories.map((category) => (
+                        <div
+                          key={category.category}
+                          className="relative px-4 py-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center"
+                          onMouseEnter={() => setHoveredCategory(category.category)} // Set hovered category
+                          onMouseLeave={() => setHoveredCategory(null)} // Reset hovered category
+                        >
+                          <span onClick={() => handleCategoryClick(category.category)}>
+                            {category.category}
+                          </span>
+                          {category.subcategories.length > 0 && <FaChevronRight className="text-gray-400" />}
+
+                          {/* ✅ Subcategory Dropdown */}
+                          {hoveredCategory === category.category && category.subcategories.length > 0 && (
+                            <div
+                              className="absolute left-full top-0 ml-2 bg-white shadow-lg border rounded-lg w-56 z-50"
+                              onMouseEnter={() => setHoveredCategory(category.category)} // Keep subcategory dropdown open
+                              onMouseLeave={() => setHoveredCategory(null)} // Close subcategory dropdown
+                            >
+                              {category.subcategories.map((subcategory) => (
+                                <div
+                                  key={subcategory}
+                                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                  onClick={() => handleSubcategoryClick(category.category, subcategory)}
+                                >
+                                  {subcategory}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="px-4 py-2 text-gray-500">No categories available</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <Link
                 to="/about"
                 className={`hover:text-red-600 ${isActive("/about") ? "text-red-600" : "text-gray-700"}`}
@@ -171,7 +296,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
         {/* ✅ Cart, Logout & Hamburger Button */}
         <div className="flex space-x-4 items-center">
           {/* ✅ Show Cart Button only if NOT on Admin Pages */}
-          {!isAdminPage && (
+          {!location.pathname.startsWith("/admin") && (
             <button onClick={() => setIsCartOpen((prev) => !prev)} className="relative text-red-600 hover:text-red-800">
               <FaShoppingCart className="text-2xl" />
               {cartCount > 0 && (
@@ -183,7 +308,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
           )}
 
           {/* ✅ Show Logout Button ONLY on Admin Pages */}
-          {isAdminAuthenticated && isAdminPage && (
+          {localStorage.getItem("adminAuth") === "true" && location.pathname.startsWith("/admin") && (
             <button onClick={handleLogout} className="text-red-600 hover:text-red-800">
               <FaSignOutAlt className="text-2xl" title="Logout" />
             </button>
@@ -199,7 +324,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
       {/* ✅ Mobile Menu (Dropdown, Visible up to 1023px) */}
       {menuOpen && (
         <div className="absolute top-16 left-0 w-full bg-white shadow-md flex flex-col items-center py-4 lg:hidden">
-          {isAdminAuthenticated && isAdminPage ? (
+          {localStorage.getItem("adminAuth") === "true" && location.pathname.startsWith("/admin") ? (
             <>
               <Link
                 to="/admin"
@@ -232,13 +357,63 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
               >
                 Home
               </Link>
-              <Link
-                to="/shop"
-                className={`py-2 text-lg ${isActive("/shop") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
-                onClick={() => setMenuOpen(false)}
-              >
-                Products
-              </Link>
+
+              {/* ✅ Mobile Products Dropdown */}
+              <div className="relative w-full text-center py-2 text-lg hover:text-red-600">
+                <Link
+                  to="/shop"
+                  className={`w-full flex justify-between items-center ${
+                    isActive("/shop") ? "text-red-600" : "text-gray-700"
+                  }`}
+                  onClick={() => {
+                    navigate("/shop"); // Redirect to /shop
+                    setMenuOpen(false); // Close mobile menu
+                  }}
+                >
+                  <span>Products</span>
+                </Link>
+
+                {/* ✅ Show Categories and Subcategories */}
+                <div className="w-full bg-white border-t mt-2">
+                  {categories.length > 0 ? (
+                    categories.map((category) => (
+                      <div key={category.category} className="py-2">
+                        <button
+                          className="text-left w-full px-4 py-2 hover:bg-gray-100 flex justify-between items-center"
+                          onClick={() => toggleMobileCategory(category.category)}
+                        >
+                          <span>{category.category}</span>
+                          {category.subcategories.length > 0 && (
+                            <FaChevronRight
+                              className={`text-gray-400 transition-transform ${
+                                mobileCategoryOpen === category.category ? "rotate-90" : ""
+                              }`}
+                            />
+                          )}
+                        </button>
+
+                        {/* ✅ Show Subcategories */}
+                        {mobileCategoryOpen === category.category && category.subcategories.length > 0 && (
+                          <div className="pl-6">
+                            {category.subcategories.map((subcategory) => (
+                              <button
+                                key={subcategory}
+                                className="block w-full px-4 py-1 text-sm hover:bg-gray-200"
+                                onClick={() => handleSubcategoryClick(category.category, subcategory)}
+                              >
+                                {subcategory}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="px-4 py-2 text-gray-500">No categories available</p>
+                  )}
+                </div>
+              </div>
+
               <Link
                 to="/about"
                 className={`py-2 text-lg ${isActive("/about") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}

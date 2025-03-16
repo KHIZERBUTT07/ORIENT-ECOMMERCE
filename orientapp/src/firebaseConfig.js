@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore, persistentLocalCache } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // ✅ Your Firebase Config
@@ -11,12 +11,17 @@ const firebaseConfig = {
     messagingSenderId: "171137188691",
     appId: "1:171137188691:web:b15a81ddda10b71e4f97a6",
     measurementId: "G-VDMBMVNYCV"
-  };
-  
+};
 
 // ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+
+// ✅ Firestore with Caching Enabled (Speeds Up Loading)
+const db = initializeFirestore(app, {
+    localCache: persistentLocalCache()
+});
+  
+// ✅ Initialize Storage
 const storage = getStorage(app);
 
 export { db, storage };
