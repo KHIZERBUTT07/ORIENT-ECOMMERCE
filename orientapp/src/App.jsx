@@ -25,6 +25,7 @@ import AdminActiveProducts from "./admin/AdminActiveProducts";
 import EditProduct from "./admin/EditProduct";
 import AdminDeals from "./admin/AdminDeals";
 import AdminBoostingPage from "./admin/AdminBoostingPage";
+import OrdersByStaff from "./admin/OrdersByStaff";
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -173,7 +174,7 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
 
         {/* ✅ Membership Page */}
-        <Route path="/membership" element={<Membership />} />
+        <Route path="/membership" element={<Membership />} />   
 
         {/* ✅ Dealers Page */}
         <Route path="/dealer-dashboard" element={<DealerDashboard />} />
@@ -186,6 +187,8 @@ const App = () => {
         <Route path="/admin/deals" element={<ProtectedRoute element={<AdminDeals />} />} />
         <Route path="/admin/active-products" element={<AdminActiveProducts />} />
         <Route path="/admin/edit-product/:productId" element={<EditProduct />} />
+        <Route path="admin/staff-orders" element={<OrdersByStaff />} />
+
         {/* ✅ Admin Route for Managing Top Selling Products */}
         <Route path="/admin/boosting" element={<AdminBoostingPage />} />
 
