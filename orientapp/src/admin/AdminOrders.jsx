@@ -153,6 +153,71 @@ const AdminOrders = () => {
           </div>
         )}
       </div>
+
+      {/* ✅ Customer Orders Section */}
+      <div className="mt-10">
+        <h3 className="text-2xl font-bold text-center text-green-600">Customer Orders</h3>
+        {orders.length === 0 ? (
+          <p className="text-center text-gray-500 mt-6">No orders found.</p>
+        ) : (
+          <div className="overflow-x-auto mt-6">
+            <table className="min-w-full border-collapse border border-gray-300 bg-white shadow-md rounded-lg">
+              <thead>
+                <tr className="bg-gray-200 text-gray-700">
+                  <th className="border border-gray-300 p-3">Product</th>
+                  <th className="border border-gray-300 p-3">Order ID</th>
+                  <th className="border border-gray-300 p-3">Customer</th>
+                  <th className="border border-gray-300 p-3">Address</th>
+                  <th className="border border-gray-300 p-3">Total (PKR)</th>
+                  <th className="border border-gray-300 p-3">Note</th>
+                  <th className="border border-gray-300 p-3">Status</th>
+                  <th className="border border-gray-300 p-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((order) =>
+                  order.items?.map((item, index) => (
+                    <tr key={`${order.id}-${index}`} className="border border-gray-300 text-center">
+                      {/* Product Image & Name */}
+                      <td className="border border-gray-300 p-3 flex items-center space-x-3">
+                        <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
+                        <span className="text-sm font-semibold">{item.name}</span>
+                      </td>
+                      {/* Shortened Order ID */}
+                      <td className="border border-gray-300 p-3">{order.id.slice(-6)}</td>
+                      <td className="border border-gray-300 p-3">
+                        <p><strong>{order.user.name}</strong></p>
+                        <p className="text-sm text-gray-600">{order.user.phone}</p>
+                      </td>
+                      <td className="border border-gray-300 p-3">{order.user.address}, {order.user.city}</td>
+                      <td className="border border-gray-300 p-3 font-bold text-red-600">{order.total}</td>
+                      <td className="border border-gray-300 p-3">{order.note || "No note"}</td>
+                      <td className="border border-gray-300 p-3">
+                        <span className={`px-3 py-1 rounded-md text-white ${getStatusColor(order.status)}`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="border border-gray-300 p-3">
+                        <select
+                          className="border p-2 rounded"
+                          value={order.status}
+                          onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Shipped">Shipped</option>
+                          <option value="In Route">In Route</option>
+                          <option value="Delivered">Delivered</option>
+                          <option value="Failed Delivery">Failed Delivery</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
