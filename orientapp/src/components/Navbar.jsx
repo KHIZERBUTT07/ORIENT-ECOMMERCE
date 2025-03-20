@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaSignOutAlt, FaChevronRight } from "react-icons/fa";
+import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaSignOutAlt, FaChevronRight, FaCaretDown } from "react-icons/fa";
 import logo from "/images/logo.png";
 import products from "../data/products"; // ✅ Import product data
 import { db } from "../firebaseConfig"; // ✅ Import Firebase
@@ -17,6 +17,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // ✅ Toggle dropdown
   const [mobileCategoryOpen, setMobileCategoryOpen] = useState(null); // ✅ Track open mobile category
   const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(true); // ✅ Always show categories on mobile
+  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false); // ✅ Toggle admin dropdown
 
   // ✅ Fetch Categories & Subcategories from Firebase
   useEffect(() => {
@@ -114,13 +115,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
 
   // ✅ Function to check if a link is active
   const isActive = (path) => {
-    if (path === "/") {
-      // For the "Home" link, check for an exact match
-      return location.pathname === path;
-    } else {
-      // For other links, check if the current path starts with the given path
-      return location.pathname.startsWith(path);
-    }
+    return location.pathname === path;
   };
 
   // ✅ Toggle mobile category dropdown
@@ -140,30 +135,98 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
           <img src={logo} alt="Orient Appliances" className="h-10" />
         </Link>
 
+        {/* ✅ Admin Panel Section */}
+        {localStorage.getItem("adminAuth") === "true" && location.pathname.startsWith("/admin") && (
+          <div className="flex-1 flex justify-center items-center">
+            <span className="text-xl font-bold text-red-600 sm:text-2xl">Admin Panel</span>
+          </div>
+        )}
+
+        {/* ✅ See Admin Pages & Hamburger Icon */}
+        {localStorage.getItem("adminAuth") === "true" && location.pathname.startsWith("/admin") && (
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <button
+                onClick={() => setIsAdminDropdownOpen(!isAdminDropdownOpen)}
+                className="flex items-center text-gray-700 hover:text-red-600"
+              >
+                <span className="hidden sm:inline-block mr-2">See Admin Pages</span>
+                <FaBars className="text-xl" />
+              </button>
+              {isAdminDropdownOpen && (
+                <div className="absolute right-0 top-full bg-white shadow-lg border rounded-lg w-48 z-50">
+                  <Link
+                    to="/admin"
+                    className={`block px-4 py-2 hover:bg-gray-100 ${
+                      isActive("/admin") ? "text-red-600 font-semibold" : "text-gray-700"
+                    }`}
+                    onClick={() => setIsAdminDropdownOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/admin/orders"
+                    className={`block px-4 py-2 hover:bg-gray-100 ${
+                      isActive("/admin/orders") ? "text-red-600 font-semibold" : "text-gray-700"
+                    }`}
+                    onClick={() => setIsAdminDropdownOpen(false)}
+                  >
+                    Orders
+                  </Link>
+                  <Link
+                    to="/admin/memberships"
+                    className={`block px-4 py-2 hover:bg-gray-100 ${
+                      isActive("/admin/memberships") ? "text-red-600 font-semibold" : "text-gray-700"
+                    }`}
+                    onClick={() => setIsAdminDropdownOpen(false)}
+                  >
+                    Dealerships
+                  </Link>
+                  <Link
+                    to="/admin/deals"
+                    className={`block px-4 py-2 hover:bg-gray-100 ${
+                      isActive("/admin/deals") ? "text-red-600 font-semibold" : "text-gray-700"
+                    }`}
+                    onClick={() => setIsAdminDropdownOpen(false)}
+                  >
+                    Deals
+                  </Link>
+                  <Link
+                    to="/admin/active-products"
+                    className={`block px-4 py-2 hover:bg-gray-100 ${
+                      isActive("/admin/active-products") ? "text-red-600 font-semibold" : "text-gray-700"
+                    }`}
+                    onClick={() => setIsAdminDropdownOpen(false)}
+                  >
+                    Active Products
+                  </Link>
+                  <Link
+                    to="/admin/boosting"
+                    className={`block px-4 py-2 hover:bg-gray-100 ${
+                      isActive("/admin/boosting") ? "text-red-600 font-semibold" : "text-gray-700"
+                    }`}
+                    onClick={() => setIsAdminDropdownOpen(false)}
+                  >
+                    Boosting
+                  </Link>
+                  <Link
+                    to="/admin/staff-orders"
+                    className={`block px-4 py-2 hover:bg-gray-100 ${
+                      isActive("/admin/staff-orders") ? "text-red-600 font-semibold" : "text-gray-700"
+                    }`}
+                    onClick={() => setIsAdminDropdownOpen(false)}
+                  >
+                    Staff Orders
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ✅ Desktop & Tablet Menu (Hidden below 1024px) */}
         <div className="hidden lg:flex space-x-6">
-          {localStorage.getItem("adminAuth") === "true" && location.pathname.startsWith("/admin") ? (
-            <>
-              <Link
-                to="/admin"
-                className={`hover:text-red-600 ${isActive("/admin") ? "text-red-600" : "text-gray-700"}`}
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/admin/orders"
-                className={`hover:text-red-600 ${isActive("/admin/orders") ? "text-red-600" : "text-gray-700"}`}
-              >
-                Orders
-              </Link>
-              <Link
-                to="/admin/memberships"
-                className={`hover:text-red-600 ${isActive("/admin/memberships") ? "text-red-600" : "text-gray-700"}`}
-              >
-                Dealerships
-              </Link>
-            </>
-          ) : (
+          {localStorage.getItem("adminAuth") === "true" && location.pathname.startsWith("/admin") ? null : (
             <>
               <Link
                 to="/"
@@ -309,15 +372,17 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
 
           {/* ✅ Show Logout Button ONLY on Admin Pages */}
           {localStorage.getItem("adminAuth") === "true" && location.pathname.startsWith("/admin") && (
-            <button onClick={handleLogout} className="text-red-600 hover:text-red-800">
+            <button onClick={handleLogout} className="text-red-600 hover:text-red-800 ml-2">
               <FaSignOutAlt className="text-2xl" title="Logout" />
             </button>
           )}
 
           {/* ✅ Hamburger Menu for Mobile & Tablet (Visible up to 1023px) */}
-          <button className="lg:hidden text-2xl text-red-600" onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <FaTimes /> : <FaBars />}
-          </button>
+          {!location.pathname.startsWith("/admin") && (
+            <button className="lg:hidden text-2xl text-red-600" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <FaTimes /> : <FaBars />}
+            </button>
+          )}
         </div>
       </div>
 
@@ -328,21 +393,21 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
             <>
               <Link
                 to="/admin"
-                className={`py-2 text-lg ${isActive("/admin") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                className={`py-2 text-lg ${isActive("/admin") ? "text-red-600 font-semibold" : "text-gray-700"} hover:text-red-600`}
                 onClick={() => setMenuOpen(false)}
               >
                 Dashboard
               </Link>
               <Link
                 to="/admin/orders"
-                className={`py-2 text-lg ${isActive("/admin/orders") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                className={`py-2 text-lg ${isActive("/admin/orders") ? "text-red-600 font-semibold" : "text-gray-700"} hover:text-red-600`}
                 onClick={() => setMenuOpen(false)}
               >
                 Orders
               </Link>
               <Link
                 to="/admin/memberships"
-                className={`py-2 text-lg ${isActive("/admin/memberships") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                className={`py-2 text-lg ${isActive("/admin/memberships") ? "text-red-600 font-semibold" : "text-gray-700"} hover:text-red-600`}
                 onClick={() => setMenuOpen(false)}
               >
                 Dealerships
@@ -352,7 +417,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
             <>
               <Link
                 to="/"
-                className={`py-2 text-lg ${isActive("/") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                className={`py-2 text-lg ${isActive("/") ? "text-red-600 font-semibold" : "text-gray-700"} hover:text-red-600`}
                 onClick={() => setMenuOpen(false)}
               >
                 Home
@@ -363,7 +428,7 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
                 <Link
                   to="/shop"
                   className={`w-full flex justify-between items-center ${
-                    isActive("/shop") ? "text-red-600" : "text-gray-700"
+                    isActive("/shop") ? "text-red-600 font-semibold" : "text-gray-700"
                   }`}
                   onClick={() => {
                     navigate("/shop"); // Redirect to /shop
@@ -416,21 +481,21 @@ const Navbar = ({ cartCount, setIsCartOpen, setSearchQuery }) => {
 
               <Link
                 to="/about"
-                className={`py-2 text-lg ${isActive("/about") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                className={`py-2 text-lg ${isActive("/about") ? "text-red-600 font-semibold" : "text-gray-700"} hover:text-red-600`}
                 onClick={() => setMenuOpen(false)}
               >
                 Who We Are
               </Link>
               <Link
                 to="/contact"
-                className={`py-2 text-lg ${isActive("/contact") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                className={`py-2 text-lg ${isActive("/contact") ? "text-red-600 font-semibold" : "text-gray-700"} hover:text-red-600`}
                 onClick={() => setMenuOpen(false)}
               >
                 Contact
               </Link>
               <Link
                 to="/membership"
-                className={`py-2 text-lg ${isActive("/membership") ? "text-red-600" : "text-gray-700"} hover:text-red-600`}
+                className={`py-2 text-lg ${isActive("/membership") ? "text-red-600 font-semibold" : "text-gray-700"} hover:text-red-600`}
                 onClick={() => setMenuOpen(false)}
               >
                 Get Dealership
